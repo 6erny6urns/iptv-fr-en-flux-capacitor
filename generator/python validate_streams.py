@@ -1,44 +1,58 @@
-import os
+import csv
+import concurrent.futures
+import requests
+from pathlib import Path
 
-# Exemple très simple de validation de flux IPTV
-# Charge le fichier playlist.m3u, valide les URLs, écrit playlist_filtered.m3u
+# Chemins
+BASE_DIR = Path(__file__).resolve().parent.parent
+SOURCES_FILE = BASE_DIR / "sources.csv"
+OUTPUT_FILE = BASE_DIR / "playlist_filtered.m3u"
+LOG_FILE = BASE_DIR / "validation_log.txt"
 
-def validate_url(url):
-    # Ici, mettre la vraie logique (ping, test HTTP, etc.)
-    return url.startswith("http")
+TIMEOUT = 3  # secondes
+MAX_WORKERS = 50  # nombre de threads en parallèle
+
+def check_stream(url):
+    """Teste si un flux est actif avec une requête HEAD."""
+    try:
+        r = requests.head(url, timeout=TIMEOUT, allow_redirects=True)
+        if r.status_code < 400:
+            return url, True
+    except Exception:
+        pass
+    return url, False
 
 def main():
-    input_path = "../playlist/playlist.m3u"
-    output_path = "../playlist/playlist_filtered.m3u"
-    log_path = "../playlist/validation_log.txt"
-
-    if not os.path.exists(input_path):
-        print(f"Fichier d'entrée non trouvé : {input_path}")
+    # Lire les sources
+    if not SOURCES_FILE.exists():
+        print(f"❌ Fichier {SOURCES_FILE} introuvable.")
         return
 
+    with open(SOURCES_FILE, newline='', encoding="utf-8") as f:
+        reader = csv.reader(f)
+        urls = [row[0].strip() for row in reader if row]
+
+    print(f"🔍 {len(urls)} flux à tester...")
+
     valid_urls = []
-    with open(input_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        results = executor.map(check_stream, urls)
 
-    with open(log_path, "w", encoding="utf-8") as log:
-        for line in lines:
-            if line.strip().startswith("#EXTINF"):
-                log.write(line)
-                valid_urls.append(line)
-            elif line.strip() and not line.strip().startswith("#"):
-                url = line.strip()
-                if validate_url(url):
-                    log.write(f"Valid URL: {url}\n")
-                    valid_urls.append(url + "\n")
+        with open(LOG_FILE, "w", encoding="utf-8") as log:
+            for url, is_valid in results:
+                if is_valid:
+                    valid_urls.append(url)
+                    log.write(f"[OK] {url}\n")
                 else:
-                    log.write(f"Invalid URL: {url}\n")
-            else:
-                valid_urls.append(line)
+                    log.write(f"[FAIL] {url}\n")
 
-    with open(output_path, "w", encoding="utf-8") as f_out:
-        f_out.writelines(valid_urls)
+    # Écrire le M3U filtré
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        f.write("#EXTM3U\n")
+        for url in valid_urls:
+            f.write(f"#EXTINF:-1,{url}\n{url}\n")
 
-    print(f"Validation terminée. {len(valid_urls)} lignes traitées.")
+    print(f"✅ {len(valid_urls)} flux valides enregistrés dans {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()
