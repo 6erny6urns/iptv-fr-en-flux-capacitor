@@ -2,15 +2,16 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # tous les jours à 4h UTC
-  workflow_dispatch:
+    - cron: '0 4 * * *'  # exécution auto tous les jours à 4h UTC
+  workflow_dispatch:     # exécution manuelle possible
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # Limite totale pour éviter les blocages
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Python 3.x
@@ -21,21 +22,32 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests m3u8
+          pip install requests
 
-      - name: Create output directories
-        run: mkdir -p playlist
-
-      - name: Run IPTV playlist generator & validator
+      - name: Create required directories
         run: |
-          cd generator
-          python generate_and_validate.py
+          mkdir -p playlist
+          mkdir -p data
+          mkdir -p generator
 
-      - name: Commit and push results
+      - name: Debug repo structure
+        run: ls -R
+
+      - name: Run stream validation script (fast mode)
+        run: python generator/validate_streams.py
+
+      - name: Show validation results
+        run: |
+          echo "=== LOG ==="
+          cat validation_log.txt || true
+          echo "=== FILTERED M3U ==="
+          head -n 20 playlist_filtered.m3u || true
+
+      - name: Commit and push filtered playlist
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add ../playlist/playlist_filtered.m3u ../playlist/validation_log.txt
+          git add playlist_filtered.m3u validation_log.txt
           git commit -m "Automated playlist update with validated streams" || echo "No changes to commit"
           git push
-        working-directory: generator
+        continue-on-error: true
