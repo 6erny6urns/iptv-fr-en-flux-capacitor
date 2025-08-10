@@ -1,12 +1,20 @@
+name: Update IPTV Playlist
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 4 * * *'  # Exécution tous les jours à 4h UTC
+  workflow_dispatch:    # Déclenchement manuel possible
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: List repository structure for debug
-        run: ls -R
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -19,11 +27,11 @@ jobs:
           pip install requests
 
       - name: Run playlist generator script
-        working-directory: iptv-fr-en-flux-capacitor/generator
+        working-directory: generator
         run: python main.py
 
       - name: Run filter and categorize script
-        working-directory: iptv-fr-en-flux-capacitor/generator
+        working-directory: generator
         run: python filter_and_categorize.py
 
       - name: Commit and push changes
