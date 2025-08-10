@@ -1,26 +1,26 @@
-url,name,group
-https://iptv-org.github.io/iptv/index.country.m3u,IPTV-ORG Global Index,Global
-https://iptv-org.github.io/iptv/index.m3u,IPTV-ORG Master Index,Global
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u,IPTV-ORG France,France
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/us.m3u,IPTV-ORG USA,USA
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ca.m3u,IPTV-ORG Canada,Canada
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/gb.m3u,IPTV-ORG UK,UK
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/de.m3u,IPTV-ORG Germany,Germany
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/es.m3u,IPTV-ORG Spain,Spain
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/it.m3u,IPTV-ORG Italy,Italy
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/jp.m3u,IPTV-ORG Japan,Japan
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/in.m3u,IPTV-ORG India,India
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/au.m3u,IPTV-ORG Australia,Australia
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/br.m3u,IPTV-ORG Brazil,Brazil
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/mx.m3u,IPTV-ORG Mexico,Mexico
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/nl.m3u,IPTV-ORG Netherlands,Netherlands
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/se.m3u,IPTV-ORG Sweden,Sweden
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/no.m3u,IPTV-ORG Norway,Norway
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/dk.m3u,IPTV-ORG Denmark,Denmark
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fi.m3u,IPTV-ORG Finland,Finland
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ru.m3u,IPTV-ORG Russia,Russia
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/pl.m3u,IPTV-ORG Poland,Poland
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/th.m3u,IPTV-ORG Thailand,Thailand
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/za.m3u,IPTV-ORG South Africa,South Africa
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/kr.m3u,IPTV-ORG Korea,South Korea
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/nz.m3u,IPTV-ORG New Zealand,New Zealand
+name,url,language,country,category
+IPTV-ORG Global Index,https://iptv-org.github.io/iptv/index.m3u,en,global,misc
+IPTV-ORG France,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u,fr,france,misc
+IPTV-ORG USA,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/us.m3u,en,usa,misc
+IPTV-ORG Canada,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ca.m3u,en,canada,misc
+IPTV-ORG UK,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/gb.m3u,en,uk,misc
+IPTV-ORG Germany,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/de.m3u,de,germany,misc
+IPTV-ORG Spain,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/es.m3u,es,spain,misc
+IPTV-ORG Italy,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/it.m3u,it,italy,misc
+IPTV-ORG Japan,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/jp.m3u,ja,japan,misc
+IPTV-ORG India,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/in.m3u,en,india,misc
+IPTV-ORG Australia,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/au.m3u,en,australia,misc
+IPTV-ORG Brazil,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/br.m3u,pt,brazil,misc
+IPTV-ORG Mexico,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/mx.m3u,es,mexico,misc
+IPTV-ORG Netherlands,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/nl.m3u,nl,netherlands,misc
+IPTV-ORG Sweden,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/se.m3u,sv,sweden,misc
+IPTV-ORG Norway,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/no.m3u,no,norway,misc
+IPTV-ORG Denmark,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/dk.m3u,da,denmark,misc
+IPTV-ORG Finland,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fi.m3u,fi,finland,misc
+IPTV-ORG Russia,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ru.m3u,ru,russia,misc
+IPTV-ORG Poland,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/pl.m3u,pl,poland,misc
+IPTV-ORG Thailand,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/th.m3u,th,thailand,misc
+IPTV-ORG South Africa,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/za.m3u,en,south_africa,misc
+IPTV-ORG Korea,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/kr.m3u,ko,korea,misc
+IPTV-ORG New Zealand,https://raw.githubusercontent.com/iptv-org/iptv/master/streams/nz.m3u,en,new_zealand,misc
+Extra IPTV Sample,https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8,en,global,misc
