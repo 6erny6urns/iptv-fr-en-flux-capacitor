@@ -1,49 +1,51 @@
-# IPTV FR-EN Flux Capacitor
+# IPTV Playlist Generator Automatisé
 
-Playlist IPTV multilingue (.m3u/.m3u8) – Français, Anglais – Monde entier
+## Description
 
-Ce projet propose une playlist IPTV actualisée automatiquement via GitHub Actions, filtrée et organisée pour inclure les chaînes les plus populaires au Québec (Montréal), France (Paris) et États-Unis (New York), en français et en anglais.
-
----
-
-## Fonctionnalités
-
-- Téléchargement automatique des sources IPTV depuis des URLs configurées dans `data/sources.csv`.  
-- Test automatique de validité des flux, suppression des chaînes non fonctionnelles.  
-- Filtrage et catégorisation des chaînes selon pays, langue et popularité.  
-- Génération d’une playlist optimisée avec une section **FAVORIS** regroupant les chaînes principales.  
-- Automatisation complète via GitHub Actions avec mise à jour quotidienne.  
-- Compatible avec MyTVOnline 2 et autres lecteurs IPTV prenant en charge les playlists `.m3u`.
+Ce projet permet de générer automatiquement une playlist IPTV `.m3u` consolidée, filtrée et validée à partir de multiples sources fiables. L’ensemble du processus est automatisé via un workflow GitHub Actions, garantissant une mise à jour régulière sans intervention manuelle.
 
 ---
 
-## Instructions pour mise à jour
+## Structure du projet
 
-1. Commiter et pousser les fichiers modifiés/créés dans le dépôt GitHub.  
-2. Lancer manuellement le workflow GitHub Actions depuis l’onglet **Actions** si nécessaire.  
-3. Vérifier que le fichier `playlist_filtered.m3u` a été généré dans le dépôt.  
-4. Utiliser l’URL GitHub raw pour charger la playlist dans MyTVOnline 2 :  
 
 ---
 
-## Remarque importante
+## Fonctionnement
 
-Le script filtre uniquement sur la base des chaînes listées dans la variable `FAVORITES` du script Python.  
-Il est impératif que les noms et tags dans cette liste correspondent exactement aux noms/tags présents dans les playlists sources pour assurer leur inclusion dans la section FAVORIS.
+1. **Lecture des sources** :  
+   Le script `update_playlist.py` lit les URLs IPTV listées dans `data/sources.csv`.
+
+2. **Téléchargement des playlists sources** :  
+   Chaque URL est téléchargée, son contenu M3U parsé pour extraire les chaînes.
+
+3. **Validation des flux** :  
+   Chaque flux (URL) est testé via requête HTTP HEAD ou GET partiel pour confirmer sa disponibilité.
+
+4. **Filtrage** :  
+   Seules les chaînes dont le flux est valide sont conservées.
+
+5. **Écriture de la playlist finale** :  
+   La playlist filtrée est écrite dans `playlist/playlist_filtered.m3u`.
+
+6. **Automatisation** :  
+   Le workflow GitHub Actions déclenche ce script automatiquement, selon une planification (cron) ou manuellement (dispatch).
+
+7. **Mise à jour et push** :  
+   Si la playlist a changé, elle est commitée et poussée vers le dépôt.
 
 ---
 
-## Structure du dépôt
+## Installation / Prérequis
 
-- `data/` : fichiers sources (ex. URLs des playlists)  
-- `epg/` : guide électronique des programmes (EPG)  
-- `generator/` : scripts Python de génération et filtrage  
-- `playlist/` : playlists générées (`playlist.m3u` et `playlist_filtered.m3u`)  
-- `.github/workflows/` : fichiers de configuration des GitHub Actions  
+- Python 3.x  
+- Librairie Python `requests` (`pip install requests`)
+
+Dans GitHub Actions, l’environnement est configuré automatiquement.
 
 ---
 
-## Licence
+## Usage local
 
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour les détails.
-
+```bash
+python generator/update_playlist.py
