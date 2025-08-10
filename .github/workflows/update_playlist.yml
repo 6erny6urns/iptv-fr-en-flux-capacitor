@@ -2,13 +2,12 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # exécution auto tous les jours à 4h UTC
-  workflow_dispatch:     # exécution manuelle possible
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # Limite totale pour éviter les blocages
 
     steps:
       - name: Checkout repository
@@ -24,30 +23,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Create required directories
-        run: |
-          mkdir -p playlist
-          mkdir -p data
-          mkdir -p generator
+      - name: Create output directory if missing
+        run: mkdir -p playlist
 
-      - name: Debug repo structure
+      - name: Download or generate initial playlist_filtered.m3u
+        run: |
+          # Exemple : télécharger un fichier de base depuis GitHub ou autre source fiable
+          curl -L -o playlist/playlist_filtered.m3u https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u
+          # OU exécuter un script de génération brute
+          # python generator/generate_raw_playlist.py > playlist/playlist_filtered.m3u
+
+      - name: List repo structure (debug)
         run: ls -R
 
-      - name: Run stream validation script (fast mode)
-        run: python generator/validate_streams.py
-
-      - name: Show validation results
-        run: |
-          echo "=== LOG ==="
-          cat validation_log.txt || true
-          echo "=== FILTERED M3U ==="
-          head -n 20 playlist_filtered.m3u || true
+      - name: Run stream validation script
+        run: python generator/validate_streams.py playlist/playlist_filtered.m3u
 
       - name: Commit and push filtered playlist
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add playlist_filtered.m3u validation_log.txt
-          git commit -m "Automated playlist update with validated streams" || echo "No changes to commit"
+          git add playlist/playlist_filtered.m3u validation_log.txt
+          git commit -m "Automated playlist update with validated streams"
           git push
         continue-on-error: true
