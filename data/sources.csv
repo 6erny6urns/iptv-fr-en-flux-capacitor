@@ -1,28 +1,26 @@
-url,description,pays,langue,type
-https://iptv-org.github.io/iptv/index.m3u,IPTV-org Global Index,Global,Multi,Live
-https://iptv-org.github.io/iptv/index.country.m3u,IPTV-org Par pays,Global,Multi,Live
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u,IPTV-org France,France,Français,Live
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/us.m3u,IPTV-org USA,USA,English,Live
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/de.m3u,IPTV-org Allemagne,Germany,Deutsch,Live
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/es.m3u,IPTV-org Espagne,Spain,Español,Live
-https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ca.m3u,IPTV-org Canada,Canada,Français/English,Live
-https://iptv-org.github.io/iptv/channels.m3u,IPTV-org Channels,Global,Multi,Live
-https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8,Exemple Akamai Live Stream,Global,Multi,Live
-https://streambox.fr/mse-test/live/playlist.m3u8,Streambox Test Live,Global,Multi,Live
-http://live-hls-web-aje.getaj.net/AJE/index.m3u8,Al Jazeera English Live,Global,English,Live
-https://cdn-cf-east.streamtheworld.com/live/mp3-128-nprnews-aac.m3u8,NPR News Live,USA,English,Live
-https://moosecat.streamguys1.com/live,Moosecat Live,Global,English,Live
-https://live-radio01.mediahubaustralia.com/2TJW/mp3/,Radio Australia Live,Australia,English,Live
-https://streaming.tdiradio.com/tdiradio.m3u,TDIRadio Live,Global,Multi,Live
-https://livestream.antenne.de/antenne.m3u8,Antenne Live,France,Français,Live
-http://stream.radioking.com/radio/5173/stream/39943,NRJ Radio Live,France,Français,Live
-https://audio01.ibizastaging.com:8000/stream,Ibiza Live,Global,Multi,Live
-https://eu1.fastcast4u.com/proxy/salzburgfm?mp=/stream,Salzburg FM Live,Autriche,Deutsch,Live
-http://icecast.omroep.nl/radio1-bb-mp3,Radio 1 Netherlands,Netherlands,Deutsch/English,Live
-https://streams.ilovemusic.de/iloveradio1.mp3,ILoveRadio1,Global,Multi,Live
-https://edge.ustream.tv/live/1.m3u8,Ustream Live,Global,Multi,Live
-http://playerservices.streamtheworld.com/api/livestream-redirect/NRJ.mp3,NRJ Live France,France,Français,Live
-http://stream.whus.org:8000/whusfm,WHUS Radio Live,USA,English,Live
-http://streaming.radionomy.com/JamendoLounge,Jamendo Lounge Live,Global,Multi,Live
-https://live.radionomy.com/Radio-Offshore,Radio Offshore Live,Global,Multi,Live
-https://stream.radioparadise.com/mp3-192,Radio Paradise Live,Global,Multi,Live
+url,name,group
+https://iptv-org.github.io/iptv/index.country.m3u,IPTV-ORG Global Index,Global
+https://iptv-org.github.io/iptv/index.m3u,IPTV-ORG Master Index,Global
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u,IPTV-ORG France,France
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/us.m3u,IPTV-ORG USA,USA
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ca.m3u,IPTV-ORG Canada,Canada
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/gb.m3u,IPTV-ORG UK,UK
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/de.m3u,IPTV-ORG Germany,Germany
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/es.m3u,IPTV-ORG Spain,Spain
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/it.m3u,IPTV-ORG Italy,Italy
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/jp.m3u,IPTV-ORG Japan,Japan
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/in.m3u,IPTV-ORG India,India
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/au.m3u,IPTV-ORG Australia,Australia
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/br.m3u,IPTV-ORG Brazil,Brazil
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/mx.m3u,IPTV-ORG Mexico,Mexico
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/nl.m3u,IPTV-ORG Netherlands,Netherlands
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/se.m3u,IPTV-ORG Sweden,Sweden
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/no.m3u,IPTV-ORG Norway,Norway
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/dk.m3u,IPTV-ORG Denmark,Denmark
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fi.m3u,IPTV-ORG Finland,Finland
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ru.m3u,IPTV-ORG Russia,Russia
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/pl.m3u,IPTV-ORG Poland,Poland
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/th.m3u,IPTV-ORG Thailand,Thailand
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/za.m3u,IPTV-ORG South Africa,South Africa
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/kr.m3u,IPTV-ORG Korea,South Korea
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/nz.m3u,IPTV-ORG New Zealand,New Zealand
