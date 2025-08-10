@@ -2,35 +2,25 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # Exécution quotidienne à 4h00 UTC
-  workflow_dispatch:      # Permet un déclenchement manuel
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
+          python-version: "3.x"
+      - run: |
           python -m pip install --upgrade pip
           pip install requests
-
-      - name: Run update_playlist script
-        run: python generator/update_playlist.py
-
-      - name: Commit and push changes
-        run: |
+      - run: python generator/update_playlist.py
+      - run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add playlist/playlist_filtered.m3u
           git diff --cached --quiet || git commit -m "Automated playlist update"
           git push
-        continue-on-error: true  # Ne pas échouer si pas de changement
+        continue-on-error: true
