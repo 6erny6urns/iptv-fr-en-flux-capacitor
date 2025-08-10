@@ -26,8 +26,14 @@ jobs:
       - name: Create output directory if missing
         run: mkdir -p playlist
 
-      - name: List repo structure (debug)
-        run: ls -R
+      - name: Install tree and export repo structure
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tree
+          tree -a -I '.git|node_modules|__pycache__' > structure.txt
+
+      - name: Show repo structure
+        run: cat structure.txt
 
       - name: Run stream validation script
         run: python generator/validate_streams.py
