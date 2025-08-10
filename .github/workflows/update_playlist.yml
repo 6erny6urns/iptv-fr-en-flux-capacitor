@@ -3,7 +3,7 @@ name: Update IPTV Playlist
 on:
   schedule:
     - cron: '0 4 * * *'  # tous les jours à 4h UTC
-  workflow_dispatch:
+  workflow_dispatch:     # possibilité d'exécuter manuellement
 
 jobs:
   build:
@@ -13,27 +13,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies (ffmpeg + python packages)
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Create playlist directory if missing
-        run: mkdir -p playlist
+      - name: Create output directory if missing
+        run: |
+          mkdir -p playlist data
 
       - name: List repo structure (debug)
-        run: ls -R
+        run: |
+          ls -R
 
       - name: Run stream validation script
-        run: python generator/validate_streams.py
+        run: |
+          python generator/validate_streams.py
 
       - name: Commit and push filtered playlist
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add playlist/playlist_filtered.m3u
-          git commit -m "Automated playlist update with validated live streams"
-          git push
-        continue-on-error: true
+          git remote set-url origin https://x-access-token:${PAT_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
+          git add playlist/playlist_filtered.m3u validation_log.txt
+          git diff --cached --quiet || git commit -m "Automated playlist update with validated live streams"
+          git push origin main
