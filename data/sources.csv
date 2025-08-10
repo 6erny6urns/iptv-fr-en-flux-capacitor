@@ -2,5 +2,20 @@ https://iptv-org.github.io/iptv/index.country.m3u
 https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france.m3u
 https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada.m3u
 https://raw.githubusercontent.com/iptv-org/iptv/master/streams/usa.m3u
-https://example.com/another-source.m3u
-# (ajoute au moins 20 autres URLs valides)
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ca.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/us.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france-1.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada-1.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/usa-1.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france-news.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada-news.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/usa-news.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france-sports.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada-sports.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/usa-sports.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france-entertainment.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada-entertainment.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/usa-entertainment.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france-music.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada-music.m3u
