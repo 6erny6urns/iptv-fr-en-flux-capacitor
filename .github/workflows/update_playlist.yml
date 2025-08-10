@@ -2,8 +2,8 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'    # Exécution chaque jour à 4h00 UTC
-  workflow_dispatch:       # Permet un déclenchement manuel
+    - cron: '0 4 * * *'  # chaque jour à 4h00 UTC
+  workflow_dispatch:     # permet déclenchement manuel
 
 jobs:
   build:
@@ -34,6 +34,6 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add playlist/playlist_filtered.m3u
-          git diff --cached --quiet || git commit -m "Automated playlist update"
+          git commit -m "Automated playlist update"
           git push
-        continue-on-error: true  # Ne fait pas échouer le job si push sans changement
+        continue-on-error: true
