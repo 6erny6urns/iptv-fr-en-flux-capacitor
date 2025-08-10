@@ -1,149 +1,66 @@
 import os
 import re
-import logging
 
-INPUT_FILE = 'playlist/playlist.m3u'
-OUTPUT_FILE = 'playlist/playlist_filtered.m3u'
-LOG_FILE = 'log_update.txt'
+PLAYLIST_DIR = os.path.join(os.path.dirname(__file__), '..', 'playlist')
+INPUT_PLAYLIST = os.path.join(PLAYLIST_DIR, 'playlist.m3u')
+OUTPUT_PLAYLIST = os.path.join(PLAYLIST_DIR, 'playlist_filtered.m3u')
 
-FAVORITES = [
-    # Ta liste exhaustive, exact nom tel que dans #EXTINF titre
-    "1TV.af@SD",
-    "CBC Montreal",
-    "TF1",
-    "CNN",
-    "WABC-TV 7",
-    "ICI Télé",
-    "TVA",
-    "Noovo",
-    "Télé-Québec",
-    "LCN",
-    "RDS",
-    "ICI RDI",
-    "Canal Vie",
-    "Super Écran",
-    "AddikTV",
-    "CASA",
-    "Évasion",
-    "Prise 2",
-    "TV5",
-    "Canal Savoir",
-    "Unis TV",
-    "CTV",
-    "Global",
-    "Citytv",
-    "TSN",
-    "Sportsnet",
-    "CP24",
-    "BBC",
-    "Metro 14",
-    "OMNI",
-    "Crave",
-    "Télétoon",
-    "The Weather Network",
-    "France 2",
-    "France 3",
-    "M6",
-    "France 5",
-    "Arte",
-    "C8",
-    "TMC",
-    "W9",
-    "TFX",
-    "NRJ 12",
-    "Paris Première",
-    "TV Breizh",
-    "6ter",
-    "BFMTV",
-    "CNews",
-    "LCI",
-    "franceinfo",
-    "Canal+",
-    "L'Équipe",
-    "Gulli",
-    "France 4",
-    "Chérie 25",
-    "RTL9",
-    "13ème Rue",
-    "Syfy",
-    "Téva",
-    "CStar",
-    "RMC Story",
-    "RMC Découverte",
-    "ABC",
-    "CBS",
-    "NBC",
-    "FOX",
-    "CW",
-    "Fox News Channel",
-    "MSNBC",
-    "CNBC",
-    "PBS",
-    "Newsmax",
-    "NewsNation",
-    "Telemundo",
-    "Univision",
-    "WCBS-TV 2",
-    "WNBC 4",
-    "WNYW 5",
-    "WPIX 11",
-    "Spectrum News NY1",
-]
+def is_valid_url(url):
+    # Test simple de validité syntaxique URL
+    pattern = re.compile(r'^http[s]?://')
+    return bool(pattern.match(url))
 
-def parse_m3u(content):
-    entries = []
-    lines = content.splitlines()
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        if line.startswith('#EXTINF:'):
-            extinf = line
-            url = lines[i+1] if i+1 < len(lines) else ''
-            entries.append((extinf, url))
-            i += 2
-        else:
-            i += 1
-    return entries
+def test_stream_url(url, timeout=10):
+    # Test rapide si le flux est accessible (HEAD ou GET avec timeout)
+    import requests
+    try:
+        resp = requests.head(url, timeout=timeout)
+        if resp.status_code == 200:
+            return True
+    except:
+        pass
+    # fallback GET
+    try:
+        resp = requests.get(url, timeout=timeout, stream=True)
+        if resp.status_code == 200:
+            return True
+    except:
+        pass
+    return False
 
-def filter_entries(entries):
-    fav_entries = []
-    other_entries = []
-    for extinf, url in entries:
-        title = extinf.split(',')[-1].strip()
-        if title in FAVORITES:
-            fav_entries.append((extinf, url))
-        else:
-            other_entries.append((extinf, url))
-    return fav_entries, other_entries
-
-def write_playlist(fav_entries, other_entries):
-    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        f.write("#EXTM3U\n")
-        if fav_entries:
-            f.write("#EXTINF:-1 group-title=\"FAVORIS\",Favoris\n")
-            for extinf, url in fav_entries:
-                f.write(f"{extinf}\n{url}\n")
-        # Tri alphabétique du reste
-        other_entries_sorted = sorted(other_entries, key=lambda x: x[0])
-        for extinf, url in other_entries_sorted:
-            f.write(f"{extinf}\n{url}\n")
-
-def main():
-    logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-    logging.info("Début du script filter_and_categorize.py")
-
-    if not os.path.isfile(INPUT_FILE):
-        logging.error(f"Fichier d'entrée introuvable : {INPUT_FILE}")
+def filter_playlist():
+    if not os.path.exists(INPUT_PLAYLIST):
+        print("Fichier playlist.m3u non trouvé pour filtrage")
         return
 
-    with open(INPUT_FILE, 'r', encoding='utf-8') as f:
-        content = f.read()
+    with open(INPUT_PLAYLIST, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
 
-    entries = parse_m3u(content)
-    fav_entries, other_entries = filter_entries(entries)
+    filtered_lines = []
+    i = 0
+    valid_count = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith("#EXTINF"):
+            # récupère la ligne suivante URL
+            if i + 1 >= len(lines):
+                break
+            url = lines[i + 1].strip()
+            if is_valid_url(url) and test_stream_url(url):
+                filtered_lines.append(lines[i])
+                filtered_lines.append(lines[i + 1])
+                valid_count += 1
+            i += 2
+        else:
+            # on copie les entêtes généraux #EXTM3U etc.
+            if line.startswith("#EXTM3U"):
+                filtered_lines.append(lines[i])
+            i += 1
 
-    write_playlist(fav_entries, other_entries)
-    logging.info(f"Playlist filtrée et catégorisée créée : {OUTPUT_FILE}")
+    with open(OUTPUT_PLAYLIST, 'w', encoding='utf-8') as f:
+        f.writelines(filtered_lines)
+
+    print(f"{valid_count} flux valides gardés dans {OUTPUT_PLAYLIST}")
 
 if __name__ == "__main__":
-    main()
+    filter_playlist()
