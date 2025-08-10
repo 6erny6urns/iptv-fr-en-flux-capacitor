@@ -24,3 +24,26 @@ Ce projet propose une playlist IPTV actualisée automatiquement via GitHub Actio
 3. Vérifier que le fichier `playlist_filtered.m3u` a été généré dans le dépôt.  
 4. Utiliser l’URL GitHub raw pour charger la playlist dans MyTVOnline 2 :  
 
+---
+
+## Remarque importante
+
+Le script filtre uniquement sur la base des chaînes listées dans la variable `FAVORITES` du script Python.  
+Il est impératif que les noms et tags dans cette liste correspondent exactement aux noms/tags présents dans les playlists sources pour assurer leur inclusion dans la section FAVORIS.
+
+---
+
+## Structure du dépôt
+
+- `data/` : fichiers sources (ex. URLs des playlists)  
+- `epg/` : guide électronique des programmes (EPG)  
+- `generator/` : scripts Python de génération et filtrage  
+- `playlist/` : playlists générées (`playlist.m3u` et `playlist_filtered.m3u`)  
+- `.github/workflows/` : fichiers de configuration des GitHub Actions  
+
+---
+
+## Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour les détails.
+
