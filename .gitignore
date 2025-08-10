@@ -1,4 +1,3 @@
 __pycache__/
 *.pyc
-playlist/
-log_update.txt
+/raw/
