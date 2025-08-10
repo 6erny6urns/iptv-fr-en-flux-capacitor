@@ -3,7 +3,7 @@ name: Update IPTV Playlist
 on:
   schedule:
     - cron: '0 4 * * *'  # chaque jour à 4h00 UTC
-  workflow_dispatch:     # permet déclenchement manuel
+  workflow_dispatch:
 
 jobs:
   build:
