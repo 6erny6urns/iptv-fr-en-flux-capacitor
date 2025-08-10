@@ -2,8 +2,8 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # chaque jour à 4h00 UTC
-  workflow_dispatch:     # permet déclenchement manuel
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: List repository structure (debug)
+      - name: List repository structure for debug
         run: ls -R
 
       - name: Setup Python
@@ -27,10 +27,14 @@ jobs:
           pip install requests
 
       - name: Run playlist generator script
-        run: cd generator && python main.py
+        run: |
+          cd generator
+          python main.py
 
       - name: Run filter and categorize script
-        run: cd generator && python filter_and_categorize.py
+        run: |
+          cd generator
+          python filter_and_categorize.py
 
       - name: Commit and push changes
         run: |
@@ -39,4 +43,4 @@ jobs:
           git add playlist/playlist_filtered.m3u
           git commit -m "Automated playlist update"
           git push
-        continue-on-error: true  # Évite d’échouer si pas de changement
+        continue-on-error: true
