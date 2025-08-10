@@ -1,1 +1,6 @@
 https://iptv-org.github.io/iptv/index.country.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/france.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/canada.m3u
+https://raw.githubusercontent.com/iptv-org/iptv/master/streams/usa.m3u
+https://example.com/another-source.m3u
+# (ajoute au moins 20 autres URLs valides)
