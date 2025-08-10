@@ -47,5 +47,3 @@ Il est impératif que les noms et tags dans cette liste correspondent exactement
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour les détails.
 
 ---
-
-Si tu as besoin d’aide pour modifier ou étendre ce projet, n’hésite pas à demander.
