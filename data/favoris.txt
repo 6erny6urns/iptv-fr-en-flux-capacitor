@@ -3,3 +3,82 @@ CBC Montreal
 TF1
 CNN
 WABC-TV 7
+TVA
+Noovo
+Télé-Québec
+LCN
+RDS
+ICI RDI
+Canal Vie
+Super Écran
+AddikTV
+CASA
+Évasion
+Prise 2
+TV5
+Canal Savoir
+Unis TV
+CTV
+CBC
+Global
+Citytv
+TSN
+Sportsnet
+CP24
+BBC
+Metro 14
+OMNI
+Crave
+Télétoon
+The Weather Network
+ICI Télé
+Noovo
+TV5 Québec Canada
+TF1
+France 2
+France 3
+M6
+France 5
+Arte
+C8
+TMC
+W9
+TFX
+NRJ 12
+Paris Première
+TV Breizh
+6ter
+BFMTV
+CNews
+LCI
+franceinfo:
+Canal+
+L'Équipe
+Gulli
+France 4
+Chérie 25
+RTL9
+13ème Rue
+Syfy
+Téva
+CStar
+RMC Story
+RMC Découverte
+ABC
+CBS
+NBC
+FOX
+CW
+Fox News Channel
+MSNBC
+CNBC
+PBS
+Newsmax
+NewsNation
+Telemundo
+Univision
+WNBC 4
+WCBS-TV 2
+WPIX 11
+Spectrum News NY1
+WNYW 5
