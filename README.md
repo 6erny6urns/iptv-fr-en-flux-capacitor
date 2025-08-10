@@ -21,7 +21,7 @@ Ce projet propose une playlist IPTV actualisée automatiquement via GitHub Actio
 1. Commiter et pousser les fichiers modifiés/créés dans le dépôt GitHub.  
 2. Lancer manuellement le workflow GitHub Actions depuis l’onglet **Actions** si nécessaire.  
 3. Vérifier que le fichier `playlist_filtered.m3u` a été généré dans le dépôt.  
-4. Recharger la playlist dans MyTVOnline 2 via l’URL GitHub :  
+4. Recharger la playlist dans MyTVOnline 2 via l’URL GitHub.
 
 ---
 
@@ -45,5 +45,3 @@ Il est impératif que les noms et tags dans cette liste correspondent exactement
 ## Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour les détails.
-
----
