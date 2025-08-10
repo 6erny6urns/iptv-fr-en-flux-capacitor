@@ -1,91 +1,44 @@
-import csv
-import requests
 import os
-import time
 
-SOURCES_CSV = 'sources.csv'
-OUTPUT_M3U = 'playlist_filtered.m3u'
-LOG_FILE = 'validation_log.txt'
-TIMEOUT = 10  # secondes timeout requête
+# Exemple très simple de validation de flux IPTV
+# Charge le fichier playlist.m3u, valide les URLs, écrit playlist_filtered.m3u
 
-def fetch_playlist(url):
-    try:
-        resp = requests.get(url, timeout=TIMEOUT)
-        resp.raise_for_status()
-        return resp.text
-    except Exception as e:
-        return None
-
-def test_stream_url(url):
-    try:
-        # HEAD souvent interdit, fallback GET avec stream=True, lecture minimale
-        resp = requests.head(url, timeout=TIMEOUT)
-        if resp.status_code == 200:
-            return True
-        # Fallback GET
-        resp = requests.get(url, timeout=TIMEOUT, stream=True)
-        if resp.status_code == 200:
-            return True
-    except:
-        return False
-    return False
-
-def parse_m3u(text):
-    lines = text.splitlines()
-    entries = []
-    current_meta = ''
-    for line in lines:
-        line = line.strip()
-        if not line or line.startswith('#EXTM3U'):
-            continue
-        if line.startswith('#EXTINF'):
-            current_meta = line
-        elif line.startswith('http') or line.startswith('udp://') or line.startswith('rtmp'):
-            entries.append((current_meta, line))
-            current_meta = ''
-    return entries
+def validate_url(url):
+    # Ici, mettre la vraie logique (ping, test HTTP, etc.)
+    return url.startswith("http")
 
 def main():
-    total_sources = 0
-    total_streams = 0
-    valid_streams = 0
+    input_path = "../playlist/playlist.m3u"
+    output_path = "../playlist/playlist_filtered.m3u"
+    log_path = "../playlist/validation_log.txt"
 
-    with open(LOG_FILE, 'w', encoding='utf-8') as logf, \
-         open(OUTPUT_M3U, 'w', encoding='utf-8') as outm3u:
+    if not os.path.exists(input_path):
+        print(f"Fichier d'entrée non trouvé : {input_path}")
+        return
 
-        outm3u.write('#EXTM3U\n')
+    valid_urls = []
+    with open(input_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
 
-        with open(SOURCES_CSV, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                url = row.get('url')
-                desc = row.get('description', '')
-                if not url:
-                    logf.write(f"[WARN] URL vide dans sources.csv\n")
-                    continue
-                total_sources += 1
-                logf.write(f"[INFO] Télécharger playlist : {url}\n")
-                pl_text = fetch_playlist(url)
-                if not pl_text:
-                    logf.write(f"[ERROR] Échec téléchargement {url}\n")
-                    continue
-                streams = parse_m3u(pl_text)
-                total_streams += len(streams)
-                logf.write(f"[INFO] {len(streams)} flux extraits\n")
+    with open(log_path, "w", encoding="utf-8") as log:
+        for line in lines:
+            if line.strip().startswith("#EXTINF"):
+                log.write(line)
+                valid_urls.append(line)
+            elif line.strip() and not line.strip().startswith("#"):
+                url = line.strip()
+                if validate_url(url):
+                    log.write(f"Valid URL: {url}\n")
+                    valid_urls.append(url + "\n")
+                else:
+                    log.write(f"Invalid URL: {url}\n")
+            else:
+                valid_urls.append(line)
 
-                for meta, stream_url in streams:
-                    logf.write(f"[DEBUG] Tester flux {stream_url}...\n")
-                    if test_stream_url(stream_url):
-                        valid_streams += 1
-                        outm3u.write(meta + '\n' + stream_url + '\n')
-                        logf.write(f"[OK] Flux valide\n")
-                    else:
-                        logf.write(f"[FAIL] Flux invalide ou inaccessible\n")
+    with open(output_path, "w", encoding="utf-8") as f_out:
+        f_out.writelines(valid_urls)
 
-                # Pause pour éviter blocage réseau / throttling (ajustable)
-                time.sleep(1)
+    print(f"Validation terminée. {len(valid_urls)} lignes traitées.")
 
-        logf.write(f"\nRésumé : sources={total_sources}, flux totaux={total_streams}, flux valides={valid_streams}\n")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
