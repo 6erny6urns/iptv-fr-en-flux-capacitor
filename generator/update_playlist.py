@@ -2,8 +2,8 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # tous les jours à 4h UTC
-  workflow_dispatch:     # exécution manuelle possible
+    - cron: '0 4 * * *'  # Tous les jours à 4h UTC
+  workflow_dispatch:     # Permet un lancement manuel
 
 jobs:
   build:
@@ -24,22 +24,23 @@ jobs:
           pip install requests
 
       - name: Create output directory if missing
+        run: mkdir -p playlist
+
+      - name: Download initial playlist_filtered.m3u
         run: |
-          mkdir -p playlist
+          curl -L -o playlist/playlist_filtered.m3u https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u
 
       - name: List repo structure (debug)
-        run: |
-          ls -R
+        run: ls -R
 
       - name: Run stream validation script
-        run: |
-          python generator/validate_streams.py
+        run: python generator/validate_streams.py playlist/playlist_filtered.m3u
 
-      - name: Commit and push filtered playlist
+      - name: Commit and push filtered playlist and logs
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add playlist_filtered.m3u validation_log.txt
           git commit -m "Automated playlist update with validated streams"
           git push
-        continue-on-error: true  # éviter échec si pas de changement
+        continue-on-error: true
