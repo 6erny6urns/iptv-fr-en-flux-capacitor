@@ -1,69 +1,84 @@
 import os
-import re
 
-PLAYLIST_IN = "playlist/playlist.m3u"
-PLAYLIST_OUT = "playlist/playlist_filtered.m3u"
+PLAYLIST_DIR = "playlist"
+INPUT_FILE = os.path.join(PLAYLIST_DIR, "playlist.m3u")
+OUTPUT_FILE = os.path.join(PLAYLIST_DIR, "playlist_filtered.m3u")
 
-# Liste des chaînes prioritaires EXACTES (tvg-id ou nom exact dans #EXTINF)
+# Liste des favoris EXACTS (doivent correspondre aux noms dans la playlist)
 FAVORITES = [
     "1TV.af@SD",
     "CBC Montreal",
     "TF1",
     "CNN",
     "WABC-TV 7",
-    # Ajoute ici toutes les chaînes que tu as listées, exactement comme dans #EXTINF
+    # Ajoute ici toutes les chaînes que tu veux en favoris
 ]
 
-def extract_channels(content):
-    # Retourne une liste de tuples (header_line, url_line)
-    pattern = re.compile(r"(#EXTINF:[^\n]+\n)([^\n]+)", re.IGNORECASE)
-    return pattern.findall(content)
+def read_playlist(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
-def is_favorite(header_line):
-    # Vérifie si la chaîne est dans FAVORITES
-    for fav in FAVORITES:
-        if fav.lower() in header_line.lower():
-            return True
-    return False
+def write_playlist(path, content):
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
 
-def add_favorites_group_tag(header_line):
-    # Ajoute ou remplace group-title par FAVORIS
-    if "group-title=" in header_line:
-        header_line = re.sub(r'group-title="[^"]*"', 'group-title="FAVORIS"', header_line)
-    else:
-        header_line = header_line.strip()[:-1] + ' group-title="FAVORIS",\n'  # insère avant le dernier ',\n'
-    return header_line
+def extract_channels(playlist_content):
+    channels = []
+    lines = playlist_content.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("#EXTINF"):
+            info_line = line
+            url_line = lines[i+1] if i+1 < len(lines) else ""
+            channels.append((info_line, url_line))
+            i += 2
+        else:
+            i += 1
+    return channels
+
+def get_channel_name(extinf_line):
+    # Extrait le nom après la dernière virgule
+    return extinf_line.split(",")[-1].strip()
+
+def filter_channels(channels):
+    favoris = []
+    autres = []
+
+    for info, url in channels:
+        name = get_channel_name(info)
+        if any(fav == name for fav in FAVORITES):
+            favoris.append((info, url))
+        else:
+            autres.append((info, url))
+
+    # Trier les autres chaînes par ordre alphabétique (optionnel)
+    autres = sorted(autres, key=lambda x: get_channel_name(x[0]))
+
+    return favoris, autres
+
+def build_playlist(favoris, autres):
+    playlist = "#EXTM3U\n\n"
+    if favoris:
+        playlist += "#EXTINF:-1,Catégorie FAVORIS\n"
+        for info, url in favoris:
+            playlist += f"{info}\n{url}\n"
+        playlist += "\n"
+    for info, url in autres:
+        playlist += f"{info}\n{url}\n"
+    return playlist
 
 def main():
-    if not os.path.exists("playlist"):
-        os.makedirs("playlist")
+    if not os.path.exists(PLAYLIST_DIR):
+        print(f"Le dossier {PLAYLIST_DIR} est introuvable.")
+        return
 
-    with open(PLAYLIST_IN, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    channels = extract_channels(content)
-
-    favorites = []
-    others = []
-
-    for header, url in channels:
-        if is_favorite(header):
-            header_mod = add_favorites_group_tag(header)
-            favorites.append((header_mod, url))
-        else:
-            others.append((header, url))
-
-    # Reconstruction playlist
-    result = "#EXTM3U\n"
-    for h, u in favorites:
-        result += h + u + "\n"
-    for h, u in others:
-        result += h + u + "\n"
-
-    with open(PLAYLIST_OUT, "w", encoding="utf-8") as f:
-        f.write(result)
-
-    print(f"Playlist filtrée et catégorisée créée : {PLAYLIST_OUT}")
+    playlist_content = read_playlist(INPUT_FILE)
+    channels = extract_channels(playlist_content)
+    favoris, autres = filter_channels(channels)
+    new_playlist = build_playlist(favoris, autres)
+    write_playlist(OUTPUT_FILE, new_playlist)
+    print(f"Playlist filtrée et catégorisée créée : {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()
