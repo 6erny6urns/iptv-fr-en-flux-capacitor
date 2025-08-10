@@ -1,61 +1,60 @@
-# generator/validate_streams.py
+import csv
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import time
-import os
+import re
 
 SOURCES_FILE = "data/sources.csv"
 OUTPUT_FILE = "playlist_filtered.m3u"
 LOG_FILE = "validation_log.txt"
 
-TIMEOUT = 3  # secondes max par flux
-MAX_WORKERS = 30  # nombre de threads en parallèle
+TIMEOUT = 5  # secondes
+MAX_WORKERS = 20  # threads
 
-def check_stream(url):
+def validate_stream(url):
     try:
-        start = time.time()
-        r = requests.head(url, timeout=TIMEOUT, allow_redirects=True)
-        if r.status_code < 400:
-            elapsed = round(time.time() - start, 2)
-            return True, elapsed
-    except Exception:
-        pass
-    return False, None
+        r = requests.get(url, timeout=TIMEOUT, stream=True)
+        if r.status_code == 200 and b"#EXTM3U" in r.content[:1000]:
+            return url, True
+        else:
+            return url, False
+    except:
+        return url, False
 
-def load_streams():
-    streams = []
-    with open(SOURCES_FILE, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#"):
-                streams.append(line)
-    return streams
-
-def save_results(valid_streams, log_data):
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as out:
-        for url in valid_streams:
-            out.write(f"#EXTINF:-1,{url}\n{url}\n")
-    with open(LOG_FILE, "w", encoding="utf-8") as log:
-        log.write("\n".join(log_data))
-
-def main():
-    streams = load_streams()
+def fetch_and_filter():
     valid_streams = []
-    log_data = []
+    log_lines = []
+
+    with open(SOURCES_FILE, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        urls = [row["url"] for row in reader]
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_url = {executor.submit(check_stream, url): url for url in streams}
+        future_to_url = {executor.submit(validate_stream, url): url for url in urls}
         for future in as_completed(future_to_url):
-            url = future_to_url[future]
-            ok, elapsed = future.result()
-            if ok:
-                valid_streams.append(url)
-                log_data.append(f"[OK] {url} ({elapsed}s)")
-            else:
-                log_data.append(f"[FAIL] {url}")
+            url, is_valid = future.result()
+            log_lines.append(f"{url} => {'VALID' if is_valid else 'INVALID'}")
+            if is_valid:
+                try:
+                    r = requests.get(url, timeout=TIMEOUT)
+                    playlist_lines = r.text.strip().splitlines()
+                    valid_streams.extend(playlist_lines)
+                except:
+                    pass
 
-    save_results(valid_streams, log_data)
-    print(f"{len(valid_streams)}/{len(streams)} flux valides")
+    # Écriture logs
+    with open(LOG_FILE, "w", encoding="utf-8") as logf:
+        logf.write("\n".join(log_lines))
+
+    # Filtrage pour éviter doublons
+    filtered = []
+    seen = set()
+    for line in valid_streams:
+        if line not in seen:
+            filtered.append(line)
+            seen.add(line)
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as outf:
+        outf.write("\n".join(filtered))
 
 if __name__ == "__main__":
-    main()
+    fetch_and_filter()
