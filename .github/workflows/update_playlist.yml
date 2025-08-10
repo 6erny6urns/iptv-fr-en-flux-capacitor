@@ -2,7 +2,7 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '0 4 * * *'  # tous les jours à 4h UTC
   workflow_dispatch:
 
 jobs:
@@ -13,37 +13,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.x
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Install dependencies (ffmpeg + python packages)
         run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Create output directory if missing
+      - name: Create playlist directory if missing
         run: mkdir -p playlist
-
-      - name: Download or generate initial playlist_filtered.m3u
-        run: |
-          # Exemple : télécharger un fichier de base depuis GitHub ou autre source fiable
-          curl -L -o playlist/playlist_filtered.m3u https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u
-          # OU exécuter un script de génération brute
-          # python generator/generate_raw_playlist.py > playlist/playlist_filtered.m3u
 
       - name: List repo structure (debug)
         run: ls -R
 
       - name: Run stream validation script
-        run: python generator/validate_streams.py playlist/playlist_filtered.m3u
+        run: python generator/validate_streams.py
 
       - name: Commit and push filtered playlist
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add playlist/playlist_filtered.m3u validation_log.txt
-          git commit -m "Automated playlist update with validated streams"
+          git add playlist/playlist_filtered.m3u
+          git commit -m "Automated playlist update with validated live streams"
           git push
         continue-on-error: true
