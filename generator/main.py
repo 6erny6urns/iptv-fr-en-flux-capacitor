@@ -1,43 +1,41 @@
 import os
 import requests
 
-DATA_DIR = "data"
-PLAYLIST_DIR = "playlist"
-SOURCES_FILE = os.path.join(DATA_DIR, "sources.csv")
-OUTPUT_FILE = os.path.join(PLAYLIST_DIR, "playlist.m3u")
+SRC_CSV = os.path.join("data", "sources.csv")
+OUT_DIR = "playlist"
+OUT_FILE = os.path.join(OUT_DIR, "playlist.m3u")
 
-def download_and_parse(url):
+def download_playlist(url):
     print(f"Téléchargement et parsing : {url}")
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        print(f"Contenu téléchargé {len(response.text)} caractères")
-        return response.text
-    except requests.RequestException as e:
-        print(f"Erreur téléchargement {url}: {e}")
-        return ""
+    r = requests.get(url, timeout=20)
+    r.raise_for_status()
+    return r.text
 
 def main():
-    if not os.path.exists(PLAYLIST_DIR):
-        os.makedirs(PLAYLIST_DIR)
-
-    if not os.path.exists(DATA_DIR):
-        print(f"Le dossier {DATA_DIR} est introuvable.")
+    if not os.path.isfile(SRC_CSV):
+        print(f"Erreur : fichier source {SRC_CSV} introuvable.")
         return
-
-    with open(SOURCES_FILE, "r", encoding="utf-8") as f:
+    os.makedirs(OUT_DIR, exist_ok=True)
+    all_entries = []
+    with open(SRC_CSV, "r") as f:
         urls = [line.strip() for line in f if line.strip()]
-
-    playlist_content = "#EXTM3U\n"
-
     for url in urls:
-        content = download_and_parse(url)
-        playlist_content += content + "\n"
-
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.write(playlist_content)
-
-    print(f"Playlist générée : {OUTPUT_FILE}")
+        try:
+            content = download_playlist(url)
+            all_entries.append(content)
+            print(f"Contenu téléchargé {len(content)} caractères")
+        except Exception as e:
+            print(f"Erreur téléchargement {url}: {e}")
+    # Concaténer toutes les playlists sources
+    combined = "#EXTM3U\n"
+    for content in all_entries:
+        # On enlève la ligne #EXTM3U des contenus pour éviter doublons
+        lines = content.splitlines()
+        filtered_lines = [l for l in lines if not l.startswith("#EXTM3U")]
+        combined += "\n".join(filtered_lines) + "\n"
+    with open(OUT_FILE, "w", encoding="utf-8") as f:
+        f.write(combined)
+    print(f"Playlist générée : {OUT_FILE}")
 
 if __name__ == "__main__":
     main()
