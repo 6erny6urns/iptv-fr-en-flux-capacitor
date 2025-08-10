@@ -1,60 +1,54 @@
-import csv
 import requests
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import re
+import time
 
-SOURCES_FILE = "data/sources.csv"
-OUTPUT_FILE = "playlist_filtered.m3u"
-LOG_FILE = "validation_log.txt"
+INPUT_PLAYLIST = "playlist_filtered.m3u"
+OUTPUT_LOG = "stream_validation_report.txt"
+TIMEOUT = 5  # secondes max par requête
 
-TIMEOUT = 5  # secondes
-MAX_WORKERS = 20  # threads
+def extract_urls(m3u_path):
+    urls = []
+    with open(m3u_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("http"):
+                urls.append(line)
+    return urls
 
-def validate_stream(url):
+def test_url(url):
     try:
-        r = requests.get(url, timeout=TIMEOUT, stream=True)
-        if r.status_code == 200 and b"#EXTM3U" in r.content[:1000]:
-            return url, True
-        else:
-            return url, False
-    except:
-        return url, False
+        # Envoi d'une requête HEAD pour test rapide de disponibilité
+        resp = requests.head(url, timeout=TIMEOUT, allow_redirects=True)
+        if resp.status_code == 200:
+            return True
+        # Certains serveurs ne répondent pas bien au HEAD => fallback GET
+        resp = requests.get(url, timeout=TIMEOUT, stream=True)
+        return resp.status_code == 200
+    except Exception:
+        return False
 
-def fetch_and_filter():
-    valid_streams = []
-    log_lines = []
+def main():
+    urls = extract_urls(INPUT_PLAYLIST)
+    total = len(urls)
+    valid = 0
+    invalid_urls = []
 
-    with open(SOURCES_FILE, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        urls = [row["url"] for row in reader]
+    with open(OUTPUT_LOG, "w", encoding="utf-8") as logf:
+        logf.write(f"Stream validation report - {time.ctime()}\n")
+        logf.write(f"Total streams tested: {total}\n\n")
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_url = {executor.submit(validate_stream, url): url for url in urls}
-        for future in as_completed(future_to_url):
-            url, is_valid = future.result()
-            log_lines.append(f"{url} => {'VALID' if is_valid else 'INVALID'}")
+        for i, url in enumerate(urls, 1):
+            is_valid = test_url(url)
+            status = "VALID" if is_valid else "INVALID"
+            logf.write(f"{i}/{total} {status} - {url}\n")
             if is_valid:
-                try:
-                    r = requests.get(url, timeout=TIMEOUT)
-                    playlist_lines = r.text.strip().splitlines()
-                    valid_streams.extend(playlist_lines)
-                except:
-                    pass
+                valid += 1
+            else:
+                invalid_urls.append(url)
+            print(f"{i}/{total} {status} - {url}")
 
-    # Écriture logs
-    with open(LOG_FILE, "w", encoding="utf-8") as logf:
-        logf.write("\n".join(log_lines))
+        logf.write(f"\nSummary: {valid} valid, {total - valid} invalid streams\n")
 
-    # Filtrage pour éviter doublons
-    filtered = []
-    seen = set()
-    for line in valid_streams:
-        if line not in seen:
-            filtered.append(line)
-            seen.add(line)
-
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as outf:
-        outf.write("\n".join(filtered))
+    print(f"\nValidation done. See {OUTPUT_LOG} for details.")
 
 if __name__ == "__main__":
-    fetch_and_filter()
+    main()
