@@ -1,63 +1,61 @@
-import subprocess
 import csv
-import sys
 import os
+import subprocess
 
-INPUT_CSV = "data/sources.csv"       # adapte selon ton repo
-OUTPUT_M3U = "playlist/playlist_filtered.m3u"
+INPUT_CSV = "data/sources.csv"
+OUTPUT_DIR = "playlist"
+OUTPUT_PLAYLIST = os.path.join(OUTPUT_DIR, "playlist_filtered.m3u")
+LOG_FILE = "validation_log.txt"
 
-def test_live_stream(url, timeout=10):
-    try:
-        cmd = [
-            "ffprobe", "-v", "error",
-            "-read_intervals", "%+5",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nokey=1",
-            url
-        ]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
-        duration = float(result.stdout.decode().strip() or 0)
-        return duration > 0
-    except Exception:
-        return False
-
-def read_sources(csv_path):
-    streams = []
-    with open(csv_path, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
+def extract_urls(csv_path):
+    urls = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
         for row in reader:
-            # Exemple attendu : id, name, url, logo, group
-            streams.append({
-                "id": row.get("id", ""),
-                "name": row.get("name", "NoName"),
-                "url": row.get("url", ""),
-                "logo": row.get("logo", ""),
-                "group": row.get("group", "Unknown")
-            })
-    return streams
+            if "url" in row and row["url"].strip():
+                urls.append((row["name"], row["url"]))
+    return urls
 
-def write_m3u(streams, output_path):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write("#EXTM3U\n")
-        for s in streams:
-            f.write(f'#EXTINF:-1 tvg-id="{s["id"]}" tvg-logo="{s["logo"]}" group-title="{s["group"]}", {s["name"]} LIVE\n')
-            f.write(f'{s["url"]}\n')
+def validate_stream(url):
+    # Test avec ffprobe pour valider le flux
+    try:
+        result = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=format_name", "-of", "default=nw=1", url],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=15,
+            text=True
+        )
+        output = result.stdout.lower()
+        if "format_name=" in output:
+            return True
+    except Exception:
+        pass
+    return False
 
 def main():
-    streams = read_sources(INPUT_CSV)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    urls = extract_urls(INPUT_CSV)
     valid_streams = []
-    print(f"Testing {len(streams)} streams...")
-    for i, stream in enumerate(streams, 1):
-        print(f"Testing [{i}/{len(streams)}]: {stream['name']} ...", end="")
-        if test_live_stream(stream["url"]):
-            print("VALID")
-            valid_streams.append(stream)
-        else:
-            print("INVALID")
-    print(f"Total valid streams: {len(valid_streams)}")
-    write_m3u(valid_streams, OUTPUT_M3U)
-    print(f"Playlist saved to {OUTPUT_M3U}")
+    with open(LOG_FILE, "w", encoding="utf-8") as logf:
+        logf.write(f"Starting validation of {len(urls)} streams...\n")
+        for i, (name, url) in enumerate(urls, 1):
+            logf.write(f"Testing [{i}/{len(urls)}]: {name} ... ")
+            print(f"Testing [{i}/{len(urls)}]: {name} ... ", end="")
+            if validate_stream(url):
+                logf.write("VALID\n")
+                print("VALID")
+                valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
+            else:
+                logf.write("INVALID\n")
+                print("INVALID")
+
+        logf.write(f"Total valid streams: {len(valid_streams)}\n")
+        # Génération playlist M3U
+        with open(OUTPUT_PLAYLIST, "w", encoding="utf-8") as outf:
+            outf.write("#EXTM3U\n")
+            for entry in valid_streams:
+                outf.write(entry)
 
 if __name__ == "__main__":
     main()
