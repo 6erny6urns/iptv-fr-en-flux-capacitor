@@ -36,7 +36,8 @@ jobs:
 
       - name: Commit and push filtered playlist
         env:
-          TOKEN: ${{ secrets.GH_PAT_TOKEN }}
+          env:
+  GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
