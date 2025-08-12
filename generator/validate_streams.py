@@ -17,8 +17,8 @@ def check_ffprobe():
 
 def extract_urls(csv_path):
     if not os.path.isfile(csv_path):
-        print(f"ERROR: CSV source file not found: {csv_path}", file=sys.stderr)
-        sys.exit(1)
+        print(f"WARNING: CSV source file not found: {csv_path}")
+        return []
     urls = []
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -56,19 +56,23 @@ def main():
     valid_streams = []
 
     with open(LOG_FILE, "w", encoding="utf-8") as logf:
-        logf.write(f"Starting validation of {len(urls)} streams...\n")
-        for i, (name, url) in enumerate(urls, 1):
-            logf.write(f"Testing [{i}/{len(urls)}]: {name} ... ")
-            print(f"Testing [{i}/{len(urls)}]: {name} ... ", end="")
-            if validate_stream(url):
-                logf.write("VALID\n")
-                print("VALID")
-                valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
-            else:
-                logf.write("INVALID\n")
-                print("INVALID")
+        if not urls:
+            logf.write("No streams found in CSV.\n")
+            print("No streams found in CSV.")
+        else:
+            logf.write(f"Starting validation of {len(urls)} streams...\n")
+            for i, (name, url) in enumerate(urls, 1):
+                logf.write(f"Testing [{i}/{len(urls)}]: {name} ... ")
+                print(f"Testing [{i}/{len(urls)}]: {name} ... ", end="")
+                if validate_stream(url):
+                    logf.write("VALID\n")
+                    print("VALID")
+                    valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
+                else:
+                    logf.write("INVALID\n")
+                    print("INVALID")
 
-        logf.write(f"Total valid streams: {len(valid_streams)}\n")
+            logf.write(f"Total valid streams: {len(valid_streams)}\n")
 
     # Génération playlist M3U
     with open(OUTPUT_PLAYLIST, "w", encoding="utf-8") as outf:
