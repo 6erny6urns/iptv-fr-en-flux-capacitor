@@ -34,10 +34,9 @@ jobs:
       - name: Run stream validation script
         run: python generator/validate_streams.py
 
-      - name: Commit and push filtered playlist
+            - name: Commit and push filtered playlist
         env:
-          env:
-  GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
+          GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
