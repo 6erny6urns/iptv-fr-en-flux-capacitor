@@ -1,38 +1,47 @@
 name: Update IPTV Playlist
 
 on:
-  workflow_dispatch:   # Pour lancer manuellement
+  schedule:
+    - cron: '0 4 * * *'  # tous les jours à 4h UTC
+  workflow_dispatch:     # exécution manuelle possible
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Setup Python 3.x
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
-    - name: Create output directory if missing
-      run: mkdir -p playlist
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-    - name: Run stream validation script
-      run: python generator/validate_streams.py
+      - name: Create output directory if missing
+        run: mkdir -p playlist
 
-    - name: Commit and push filtered playlist
-      env:
-        TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@github.com"
-        git add playlist/playlist_filtered.m3u validation_log.txt
-        git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
-        git push https://x-access-token:${TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git HEAD:main
+      - name: List repo structure (debug)
+        run: ls -R
+
+      - name: Run stream validation script
+        run: python generator/validate_streams.py
+
+      - name: Commit and push filtered playlist
+        env:
+          TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
+          git add playlist_filtered.m3u validation_log.txt
+          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
+          git push
