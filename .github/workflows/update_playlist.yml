@@ -34,7 +34,7 @@ jobs:
       - name: Run stream validation script
         run: python generator/validate_streams.py
 
-            - name: Commit and push filtered playlist
+      - name: Commit and push filtered playlist
         env:
           GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
         run: |
