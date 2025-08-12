@@ -23,12 +23,23 @@ jobs:
       - name: Run validation script
         run: python3 generator/validate_streams.py
 
+      - name: Check for changes
+        id: git-check
+        run: |
+          git add playlist/ validation_log.txt
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit changes
+        if: steps.git-check.outputs.changed == 'true'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions Bot"
-          git add playlist/ validation_log.txt
-          git commit -m "Automated update: validated streams" || echo "No changes to commit"
+          git commit -m "Automated update: validated streams"
 
       - name: Push changes
+        if: steps.git-check.outputs.changed == 'true'
         run: git push
