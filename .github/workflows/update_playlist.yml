@@ -3,7 +3,7 @@ name: Validate IPTV Streams
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # exécution chaque jour à minuit UTC
+    - cron: "0 0 * * *" # Tous les jours à minuit UTC
 
 jobs:
   validate:
@@ -13,20 +13,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_PAT }} # PAT stocké dans GitHub Secrets
+          token: ${{ secrets.GH_PAT_TOKEN }}
 
-      - name: Install ffmpeg (ffprobe included)
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3 python3-pip
 
       - name: Run validation script
-        run: python generator/validate_streams.py
+        run: python3 generator/validate_streams.py
 
       - name: Commit changes
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions Bot"
           git add playlist/ validation_log.txt
-          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
+          git commit -m "Automated update: validated streams" || echo "No changes to commit"
 
       - name: Push changes
         run: git push
