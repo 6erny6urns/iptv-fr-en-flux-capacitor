@@ -1,0 +1,3 @@
+echo "test token" > test.txt
+git add test.txt
+git commit -m "Test commit with PAT"
