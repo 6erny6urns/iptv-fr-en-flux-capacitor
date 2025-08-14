@@ -3,7 +3,7 @@ name: Update IPTV Playlist
 on:
   schedule:
     - cron: '0 4 * * *'  # tous les jours à 4h UTC
-  workflow_dispatch:     # exécution manuelle possible
+  workflow_dispatch:      # permet l'exécution manuelle
 
 jobs:
   build:
@@ -28,9 +28,6 @@ jobs:
       - name: Create output directory if missing
         run: mkdir -p playlist
 
-      - name: List repo structure (debug)
-        run: ls -R
-
       - name: Run stream validation script
         run: python generator/validate_streams.py
 
@@ -40,6 +37,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
+          # Met à jour l'URL distante pour utiliser le PAT
           git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
           git add playlist/playlist_filtered.m3u validation_log.txt || echo "No changes to add"
           git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
