@@ -3,7 +3,7 @@ name: Update IPTV Playlist
 on:
   schedule:
     - cron: '0 4 * * *'  # tous les jours à 4h UTC
-  workflow_dispatch:
+  workflow_dispatch:     # exécution manuelle possible
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Setup Python 3.x
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
@@ -25,11 +25,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Create output directory
+      - name: Create output directory if missing
         run: mkdir -p playlist
 
-      - name: Run validation script
-        run: python generator/validate_streams.py
+      - name: List repo structure (debug)
+        run: ls -R
+
+      - name: Run stream validation script (real-time output)
+        run: python -u generator/validate_streams.py
 
       - name: Commit and push filtered playlist
         env:
