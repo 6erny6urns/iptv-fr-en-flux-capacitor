@@ -1,0 +1,27 @@
+Starting validation of 25 streams...
+Testing [1/25]: IPTV-ORG Global Index ... INVALID
+Testing [2/25]: IPTV-ORG France ... INVALID
+Testing [3/25]: IPTV-ORG USA ... INVALID
+Testing [4/25]: IPTV-ORG Canada ... INVALID
+Testing [5/25]: IPTV-ORG UK ... INVALID
+Testing [6/25]: IPTV-ORG Germany ... INVALID
+Testing [7/25]: IPTV-ORG Spain ... INVALID
+Testing [8/25]: IPTV-ORG Italy ... INVALID
+Testing [9/25]: IPTV-ORG Japan ... INVALID
+Testing [10/25]: IPTV-ORG India ... INVALID
+Testing [11/25]: IPTV-ORG Australia ... INVALID
+Testing [12/25]: IPTV-ORG Brazil ... INVALID
+Testing [13/25]: IPTV-ORG Mexico ... INVALID
+Testing [14/25]: IPTV-ORG Netherlands ... INVALID
+Testing [15/25]: IPTV-ORG Sweden ... INVALID
+Testing [16/25]: IPTV-ORG Norway ... INVALID
+Testing [17/25]: IPTV-ORG Denmark ... INVALID
+Testing [18/25]: IPTV-ORG Finland ... INVALID
+Testing [19/25]: IPTV-ORG Russia ... INVALID
+Testing [20/25]: IPTV-ORG Poland ... INVALID
+Testing [21/25]: IPTV-ORG Thailand ... INVALID
+Testing [22/25]: IPTV-ORG South Africa ... INVALID
+Testing [23/25]: IPTV-ORG Korea ... INVALID
+Testing [24/25]: IPTV-ORG New Zealand ... INVALID
+Testing [25/25]: Extra IPTV Sample ... VALID
+Total valid streams: 1
