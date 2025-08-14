@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup Python 3.x
         uses: actions/setup-python@v4
@@ -41,6 +43,13 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
-          git add playlist/playlist_filtered.m3u validation_log.txt || echo "No changes to add"
-          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
-          git push origin main
+          
+          git add playlist/playlist_filtered.m3u validation_log.txt
+          
+          # On ne commit que s'il y a des changements
+          if ! git diff --cached --quiet; then
+            git commit -m "Automated playlist update with validated live streams"
+            git push origin main
+          else
+            echo "✅ Aucun changement détecté, push ignoré."
+          fi
