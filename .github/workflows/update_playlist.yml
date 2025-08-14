@@ -2,11 +2,14 @@ import csv
 import os
 import subprocess
 import sys
+import requests
+from urllib.parse import urlparse
 
 INPUT_CSV = "data/sources.csv"
 OUTPUT_DIR = "playlist"
 OUTPUT_PLAYLIST = os.path.join(OUTPUT_DIR, "playlist_filtered.m3u")
-LOG_FILE = os.path.join(OUTPUT_DIR, "validation_log.txt")  # <-- log dans playlist/
+LOG_FILE = "validation_log.txt"
+TIMEOUT = 15  # secondes pour ffprobe
 
 def check_ffprobe():
     try:
@@ -14,6 +17,14 @@ def check_ffprobe():
         return True
     except Exception:
         return False
+
+def download_m3u(url):
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        return resp.text.splitlines()
+    except Exception as e:
+        return []
 
 def extract_urls(csv_path):
     if not os.path.isfile(csv_path):
@@ -29,13 +40,29 @@ def extract_urls(csv_path):
                 urls.append((name, url))
     return urls
 
+def parse_m3u_recursive(url, parent_name):
+    """Retourne une liste de tuples (nom, url) de tous les flux valides directs."""
+    urls = []
+    lines = download_m3u(url)
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.lower().endswith(".m3u") or line.lower().endswith(".m3u8"):
+            # M3U imbriqué, récursion
+            urls.extend(parse_m3u_recursive(line, parent_name))
+        elif line.startswith("http"):
+            urls.append((parent_name, line))
+    return urls
+
 def validate_stream(url):
     try:
         result = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=format_name", "-of", "default=nw=1", url],
+            ["ffprobe", "-v", "error", "-show_entries", "format=format_name",
+             "-of", "default=nw=1", url],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=15,
+            timeout=TIMEOUT,
             text=True
         )
         output = result.stdout.lower()
@@ -52,15 +79,20 @@ def main():
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    urls = extract_urls(INPUT_CSV)
+    sources = extract_urls(INPUT_CSV)
+    all_streams = []
+
+    # Extraire tous les flux directs à partir des M3U
+    for name, url in sources:
+        all_streams.extend(parse_m3u_recursive(url, name))
+
     valid_streams = []
 
-    # log dans playlist/
     with open(LOG_FILE, "w", encoding="utf-8") as logf:
-        logf.write(f"Starting validation of {len(urls)} streams...\n")
-        for i, (name, url) in enumerate(urls, 1):
-            logf.write(f"Testing [{i}/{len(urls)}]: {name} ... ")
-            print(f"Testing [{i}/{len(urls)}]: {name} ... ", end="")
+        logf.write(f"Starting validation of {len(all_streams)} streams...\n")
+        for i, (name, url) in enumerate(all_streams, 1):
+            logf.write(f"Testing [{i}/{len(all_streams)}]: {name} ... ")
+            print(f"Testing [{i}/{len(all_streams)}]: {name} ... ", end="")
             if validate_stream(url):
                 logf.write("VALID\n")
                 print("VALID")
