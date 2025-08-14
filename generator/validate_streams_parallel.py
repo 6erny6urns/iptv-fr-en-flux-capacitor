@@ -1,110 +1,47 @@
-import csv
-import os
-import subprocess
-import sys
-import requests
-from concurrent.futures import ThreadPoolExecutor, as_completed
+name: Update IPTV Playlist
 
-INPUT_CSV = "data/sources.csv"
-OUTPUT_DIR = "playlist"
-OUTPUT_PLAYLIST = os.path.join(OUTPUT_DIR, "playlist_filtered.m3u")
-LOG_FILE = "validation_log.txt"
-TIMEOUT = 15   # secondes pour ffprobe
-MAX_WORKERS = 10  # nombre de threads parallèles
+on:
+  schedule:
+    - cron: '0 4 * * *'  # tous les jours à 4h UTC
+  workflow_dispatch:     # exécution manuelle possible
 
-def check_ffprobe():
-    try:
-        subprocess.run(["ffprobe", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        return True
-    except Exception:
-        return False
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-def download_m3u(url):
-    try:
-        resp = requests.get(url, timeout=10)
-        resp.raise_for_status()
-        return resp.text.splitlines()
-    except Exception:
-        return []
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-def extract_urls(csv_path):
-    if not os.path.isfile(csv_path):
-        print(f"ERROR: CSV source file not found: {csv_path}", file=sys.stderr)
-        sys.exit(1)
-    urls = []
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if "url" in row and row["url"].strip():
-                name = row.get("name", "UNKNOWN").strip()
-                url = row["url"].strip()
-                urls.append((name, url))
-    return urls
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-def parse_m3u_recursive(url, parent_name):
-    urls = []
-    lines = download_m3u(url)
-    for line in lines:
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.lower().endswith(".m3u") or line.lower().endswith(".m3u8"):
-            urls.extend(parse_m3u_recursive(line, parent_name))
-        elif line.startswith("http"):
-            urls.append((parent_name, line))
-    return urls
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          pip install requests
 
-def validate_stream(args):
-    index, total, name, url = args
-    try:
-        result = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=format_name",
-             "-of", "default=nw=1", url],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=TIMEOUT,
-            text=True
-        )
-        output = result.stdout.lower()
-        valid = "format_name=" in output
-    except Exception:
-        valid = False
+      - name: Create output directory if missing
+        run: mkdir -p playlist
 
-    status = "VALID" if valid else "INVALID"
-    print(f"Testing [{index}/{total}]: {name} ... {status}", flush=True)
-    return name, url, valid
+      - name: List repo structure (debug)
+        run: ls -R
 
-def main():
-    if not check_ffprobe():
-        print("ERROR: ffprobe not found or not executable.", file=sys.stderr)
-        sys.exit(1)
+      - name: Run parallel stream validation script
+        run: |
+          python generator/validate_streams_parallel.py
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    sources = extract_urls(INPUT_CSV)
-    all_streams = []
-    for name, url in sources:
-        all_streams.extend(parse_m3u_recursive(url, name))
-
-    valid_streams = []
-    with open(LOG_FILE, "w", encoding="utf-8") as logf, ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(validate_stream, (i+1, len(all_streams), name, url)): (name, url)
-                   for i, (name, url) in enumerate(all_streams)}
-
-        for future in as_completed(futures):
-            name, url, valid = future.result()
-            logf.write(f"{name}: {'VALID' if valid else 'INVALID'}\n")
-            if valid:
-                valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
-
-        logf.write(f"\nTotal valid streams: {len(valid_streams)}\n")
-
-    with open(OUTPUT_PLAYLIST, "w", encoding="utf-8") as outf:
-        outf.write("#EXTM3U\n")
-        for entry in valid_streams:
-            outf.write(entry)
-
-    print(f"\nValidation complete. {len(valid_streams)} valid streams saved to '{OUTPUT_PLAYLIST}'.")
-    print(f"Log file: '{LOG_FILE}'")
-
-if __name__ == "__main__":
-    main()
+      - name: Commit and push filtered playlist
+        env:
+          PAT_FLUX_TOKEN: ${{ secrets.PAT_FLUX_TOKEN }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
+          git add playlist/playlist_filtered.m3u validation_log.txt || echo "No changes to add"
+          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
+          git push origin main
