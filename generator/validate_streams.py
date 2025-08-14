@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 import requests
-from urllib.parse import urlparse
 
 INPUT_CSV = "data/sources.csv"
 OUTPUT_DIR = "playlist"
@@ -41,6 +40,7 @@ def extract_urls(csv_path):
     return urls
 
 def parse_m3u_recursive(url, parent_name):
+    """Retourne une liste de tuples (nom, url) de tous les flux valides directs."""
     urls = []
     lines = download_m3u(url)
     for line in lines:
@@ -83,21 +83,19 @@ def main():
         all_streams.extend(parse_m3u_recursive(url, name))
 
     valid_streams = []
-    total = len(all_streams)
 
     with open(LOG_FILE, "w", encoding="utf-8") as logf:
-        logf.write(f"Starting validation of {total} streams...\n")
+        logf.write(f"Starting validation of {len(all_streams)} streams...\n")
         for i, (name, url) in enumerate(all_streams, 1):
-            percent = (i / total) * 100
-            print(f"[{i}/{total}] ({percent:.1f}%) Testing {name} ... ", end="", flush=True)
-            logf.write(f"Testing [{i}/{total}]: {name} ... ")
+            logf.write(f"Testing [{i}/{len(all_streams)}]: {name} ... ")
+            print(f"Testing [{i}/{len(all_streams)}]: {name} ... ", end="", flush=True)
             if validate_stream(url):
-                print("VALID")
                 logf.write("VALID\n")
+                print("VALID", flush=True)
                 valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
             else:
-                print("INVALID")
                 logf.write("INVALID\n")
+                print("INVALID", flush=True)
 
         logf.write(f"Total valid streams: {len(valid_streams)}\n")
 
@@ -106,8 +104,8 @@ def main():
         for entry in valid_streams:
             outf.write(entry)
 
-    print(f"\nValidation complete. {len(valid_streams)} valid streams saved to '{OUTPUT_PLAYLIST}'.")
-    print(f"Log file: '{LOG_FILE}'")
+    print(f"\nValidation complete. {len(valid_streams)} valid streams saved to '{OUTPUT_PLAYLIST}'.", flush=True)
+    print(f"Log file: '{LOG_FILE}'", flush=True)
 
 if __name__ == "__main__":
     main()
