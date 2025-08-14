@@ -3,7 +3,7 @@ name: Update Playlist
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */12 * * *" # toutes les 12 heures
+    - cron: "0 3 * * *" # exécution quotidienne à 03h00 UTC
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.x
+      - name: Setup Python 3.x
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
@@ -23,18 +23,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Run stream validation script
+        run: python generator/validate_streams_parallel.py
+
+      - name: Commit and push changes
         run: |
-          python generator/validate_streams_parallel.py | tee validation_output.log
-
-      - name: Upload validation log
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-log
-          path: validation_output.log
-
-      - name: Upload generated playlist
-        uses: actions/upload-artifact@v4
-        with:
-          name: playlist
-          path: playlist/playlist_filtered.m3u
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add playlist/playlist_filtered.m3u validation_log.txt
+          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
