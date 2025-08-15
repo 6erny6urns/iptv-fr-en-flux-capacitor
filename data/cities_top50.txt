@@ -1,0 +1,52 @@
+Toronto
+Montreal
+Quebec
+Ottawa
+Vancouver
+Calgary
+Edmonton
+Winnipeg
+Halifax
+Paris
+Lyon
+Marseille
+Toulouse
+Bordeaux
+Lille
+Nantes
+Nice
+Geneva
+Lausanne
+Brussels
+New York
+Los Angeles
+Chicago
+Houston
+Philadelphia
+Phoenix
+Dallas
+Miami
+Boston
+Washington
+Seattle
+San Francisco
+Atlanta
+London
+Manchester
+Birmingham
+Liverpool
+Leeds
+Glasgow
+Madrid
+Barcelona
+Valencia
+Seville
+Bilbao
+Lisbon
+Mexico City
+Guadalajara
+Monterrey
+Bogota
+Lima
+Buenos Aires
+Santiago
