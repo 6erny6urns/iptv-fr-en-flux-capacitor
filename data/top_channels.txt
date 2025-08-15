@@ -1,0 +1,55 @@
+TF1
+France 2
+France 3
+France 5
+M6
+Arte
+Canal+
+LCI
+BFMTV
+CNEWS
+TV5 Monde
+CBC
+Radio-Canada
+ICI
+CTV
+Global
+Citytv
+BBC One
+BBC Two
+BBC News
+ITV
+Channel 4
+Sky News
+ABC
+NBC
+CBS
+FOX
+PBS
+Telemundo
+Univision
+Unimas
+Azteca
+Canal 13
+Antena 3
+La 1
+La Sexta
+TVE
+Caracol
+RCN
+Globo
+RecordTV
+RedeTV
+Rai 1
+Rai 2
+Rai 3
+ZDF
+ARD
+DW
+NHK
+TV Tokyo
+TV Asahi
+KBS
+SBS
+TVN
+RTVE
