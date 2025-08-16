@@ -2,12 +2,13 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # Tous les jours à 4h UTC
-  workflow_dispatch:     # Permet un lancement manuel
+    - cron: '0 4 * * *'  # tous les jours à 4h UTC
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # sécurité : terminer après 15 min et produire playlist
 
     steps:
       - name: Checkout repository
@@ -20,27 +21,39 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Create output directory if missing
+      - name: Create output directory
         run: mkdir -p playlist
 
-      - name: Download initial playlist_filtered.m3u
-        run: |
-          curl -L -o playlist/playlist_filtered.m3u https://raw.githubusercontent.com/iptv-org/iptv/master/streams/fr.m3u
-
-      - name: List repo structure (debug)
+      - name: List repo structure
         run: ls -R
 
-      - name: Run stream validation script
-        run: python generator/validate_streams.py playlist/playlist_filtered.m3u
+      - name: Run stream validation script (parallel)
+        run: python generator/validate_streams_parallel.py
 
-      - name: Commit and push filtered playlist and logs
+      - name: Copy playlist to root
+        run: |
+          if [ ! -f "playlist/playlist_filtered.m3u" ]; then
+            echo "ERREUR: playlist/playlist_filtered.m3u introuvable"
+            exit 1
+          fi
+          cp playlist/playlist_filtered.m3u playlist.m3u
+          echo "Copied playlist/playlist_filtered.m3u -> playlist.m3u"
+
+      - name: Commit and push playlist + logs
+        env:
+          PAT_FLUX_TOKEN: ${{ secrets.PAT_FLUX_TOKEN }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add playlist_filtered.m3u validation_log.txt
-          git commit -m "Automated playlist update with validated streams"
-          git push
-        continue-on-error: true
+          git fetch origin main
+          git checkout main
+          git pull --rebase origin main || true
+          git add playlist/playlist_filtered.m3u playlist.m3u validation_log.txt || echo "No changes"
+          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
+          git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
+          git push origin main
