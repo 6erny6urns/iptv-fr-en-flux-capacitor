@@ -1,7 +1,14 @@
 IPTV-ORG France,https://iptv-org.github.io/iptv/countries/fr.m3u,fr,france,misc
-IPTV-ORG Canada,https://iptv-org.github.io/iptv/countries/ca.m3u,en,canada,misc
+IPTV-ORG Canada,https://iptv-org.github.io/iptv/countries/ca.m3u,fr/en,canada,misc
 IPTV-ORG United States,https://iptv-org.github.io/iptv/countries/us.m3u,en,usa,misc
 IPTV-ORG United Kingdom,https://iptv-org.github.io/iptv/countries/gb.m3u,en,uk,misc
-IPTV-ORG Belgium,https://iptv-org.github.io/iptv/countries/be.m3u,fr,belgium,misc
-IPTV-ORG Switzerland,https://iptv-org.github.io/iptv/countries/ch.m3u,fr,switzerland,misc
+IPTV-ORG Belgium,https://iptv-org.github.io/iptv/countries/be.m3u,fr/nl,belgium,misc
+IPTV-ORG Switzerland,https://iptv-org.github.io/iptv/countries/ch.m3u,fr/de/it,switzerland,misc
+IPTV-ORG Spain,https://iptv-org.github.io/iptv/countries/es.m3u,es,spain,misc
+IPTV-ORG Portugal,https://iptv-org.github.io/iptv/countries/pt.m3u,pt,portugal,misc
+IPTV-ORG Mexico,https://iptv-org.github.io/iptv/countries/mx.m3u,es,mexico,misc
+IPTV-ORG Colombia,https://iptv-org.github.io/iptv/countries/co.m3u,es,colombia,misc
+IPTV-ORG Peru,https://iptv-org.github.io/iptv/countries/pe.m3u,es,peru,misc
+IPTV-ORG Argentina,https://iptv-org.github.io/iptv/countries/ar.m3u,es,argentina,misc
+IPTV-ORG Chile,https://iptv-org.github.io/iptv/countries/cl.m3u,es,chile,misc
 IPTV-ORG International,https://iptv-org.github.io/iptv/index.m3u,en,global,misc
