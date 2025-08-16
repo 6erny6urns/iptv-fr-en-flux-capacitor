@@ -4,7 +4,7 @@ Noovo
 Télé-Québec
 LCN
 RDI
-CBC
+CBC (aussi anglais mais très suivi au Canada)
 CTV
 Global
 Citytv
@@ -34,11 +34,11 @@ PBS
 CNN
 MSNBC
 Fox News
-WPIX
-My9
-NY1
-Univision
-Telemundo
+WPIX (New York)
+My9 (New York)
+NY1 (New York local news)
+Univision (espagnol USA)
+Telemundo (espagnol USA)
 BBC One
 BBC Two
 BBC News
@@ -46,3 +46,18 @@ ITV
 Channel 4
 Channel 5
 Sky News
+Univision
+Telemundo
+Canal 13 (Chili)
+Antena 3 (Espagne)
+La 1 (RTVE Espagne)
+La Sexta (Espagne)
+TVE (Espagne)
+Caracol (Colombie)
+RCN (Colombie)
+Globo (Brésil, portugais mais populaire)
+RecordTV (Brésil)
+RedeTV (Brésil)
+Canal de las Estrellas (Mexique)
+Azteca (Mexique)
+Televisa (Mexique)
