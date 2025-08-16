@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # sécurité pour éviter les jobs trop longs
+    timeout-minutes: 15  # sécurité pour éviter jobs trop longs
 
     steps:
       - name: Checkout repository
@@ -32,14 +32,8 @@ jobs:
       - name: List repo structure (debug)
         run: ls -R
 
-      # 👉 Choisis le script que tu utilises vraiment :
-      # - Si tu utilises la version parallèle optimisée :
-      #- name: Run stream validation script (parallel)
-      #  run: python generator/validate_streams_parallel.py
-
-      # - Sinon, garde la version simple :
-      - name: Run stream validation script
-        run: python generator/validate_streams.py
+      - name: Run stream validation script (parallel)
+        run: python generator/validate_streams_parallel.py
 
       - name: Copy playlist to repo root for GitHub Pages
         run: |
@@ -57,15 +51,12 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-          # S'assurer d'être à jour avant de pousser
           git fetch origin main
           git checkout main
           git pull --rebase origin main || true
 
-          # Ajouter les fichiers générés
           git add playlist/playlist_filtered.m3u playlist.m3u validation_log.txt || echo "No changes to add"
           git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
 
-          # Pousser via PAT
           git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
           git push origin main
