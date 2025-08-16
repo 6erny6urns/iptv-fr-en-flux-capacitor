@@ -1,26 +1,25 @@
-import csv
 import os
-import subprocess
 import sys
+import csv
 import requests
-from urllib.parse import urlparse
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# CONFIGURATION
 INPUT_CSV = "data/sources.csv"
-CITIES_FILE = "data/CITIES_TOP50.txt"
-CHANNELS_FILE = "data/TOP_CHANNELS.txt"
+CITIES_FILE = "data/cities_top50.txt"
+CHANNELS_FILE = "data/top_channels.txt"
 OUTPUT_DIR = "playlist"
 OUTPUT_PLAYLIST = os.path.join(OUTPUT_DIR, "playlist_filtered.m3u")
-LOG_FILE = "validation_log.txt"
+LOG_FILE = os.path.join(OUTPUT_DIR, "validation_log.txt")
 TIMEOUT = 3  # secondes pour ffprobe
 MAX_WORKERS = 25
-HEAD_TIMEOUT = 1  # secondes pour HEAD request
 
-# Lecture des villes et chaînes ciblées
+# Lire la liste des villes et chaînes
 with open(CITIES_FILE, encoding="utf-8") as f:
-    TARGET_CITIES = [line.strip().lower() for line in f if line.strip()]
+    cities = [line.strip().lower() for line in f if line.strip()]
 with open(CHANNELS_FILE, encoding="utf-8") as f:
-    TARGET_CHANNELS = [line.strip().lower() for line in f if line.strip()]
+    channels = [line.strip().lower() for line in f if line.strip()]
 
 def check_ffprobe():
     try:
@@ -31,15 +30,15 @@ def check_ffprobe():
 
 def download_m3u(url):
     try:
-        resp = requests.get(url, timeout=10)
-        resp.raise_for_status()
-        return resp.text.splitlines()
+        r = requests.get(url, timeout=5)
+        r.raise_for_status()
+        return r.text.splitlines()
     except Exception:
         return []
 
 def extract_urls(csv_path):
     if not os.path.isfile(csv_path):
-        print(f"ERROR: CSV source file not found: {csv_path}", file=sys.stderr)
+        print(f"CSV source file not found: {csv_path}", file=sys.stderr)
         sys.exit(1)
     urls = []
     with open(csv_path, newline="", encoding="utf-8") as f:
@@ -58,28 +57,32 @@ def parse_m3u_recursive(url, parent_name):
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        if line.lower().endswith(".m3u") or line.lower().endswith(".m3u8"):
+        if line.lower().endswith((".m3u", ".m3u8")):
             urls.extend(parse_m3u_recursive(line, parent_name))
         elif line.startswith("http"):
             urls.append((parent_name, line))
     return urls
 
+def filter_target_streams(all_streams):
+    """Filtre par villes et chaînes cibles (correspondances partielles, insensible à la casse)"""
+    filtered = []
+    for name, url in all_streams:
+        lname = name.lower()
+        lurl = url.lower()
+        if any(c in lname or c in lurl for c in cities) and any(ch in lname for ch in channels):
+            filtered.append((name, url))
+    return filtered
+
 def http_head_alive(url):
     try:
-        resp = requests.head(url, timeout=HEAD_TIMEOUT)
-        return resp.status_code == 200
+        r = requests.head(url, timeout=0.5, allow_redirects=True)
+        return r.status_code < 400
     except Exception:
         return False
 
-def filter_target(name, url):
-    lower_name = name.lower()
-    # Correspondance partielle sur nom de chaîne
-    if any(ch in lower_name for ch in TARGET_CHANNELS):
-        # Vérifier si l'URL contient l'une des villes ciblées
-        return any(city in url.lower() for city in TARGET_CITIES)
-    return False
-
-def validate_stream_ffprobe(url):
+def validate_stream(url):
+    if not http_head_alive(url):
+        return False
     try:
         result = subprocess.run(
             ["ffprobe", "-v", "error", "-show_entries", "format=format_name",
@@ -89,26 +92,13 @@ def validate_stream_ffprobe(url):
             timeout=TIMEOUT,
             text=True
         )
-        output = result.stdout.lower()
-        if "format_name=" in output:
-            return True
+        return "format_name=" in result.stdout.lower()
     except Exception:
-        pass
-    return False
-
-def validate_entry(entry):
-    name, url = entry
-    if not filter_target(name, url):
-        return (name, url, "SKIPPED")
-    if not http_head_alive(url):
-        return (name, url, "INVALID")
-    if validate_stream_ffprobe(url):
-        return (name, url, "VALID")
-    return (name, url, "INVALID")
+        return False
 
 def main():
     if not check_ffprobe():
-        print("ERROR: ffprobe not found or not executable. Please install ffprobe.", file=sys.stderr)
+        print("ERROR: ffprobe not found. Install ffmpeg/ffprobe.", file=sys.stderr)
         sys.exit(1)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -118,19 +108,29 @@ def main():
     for name, url in sources:
         all_streams.extend(parse_m3u_recursive(url, name))
 
+    filtered_streams = filter_target_streams(all_streams)
+
     valid_streams = []
-    total = len(all_streams)
+    total = len(filtered_streams)
 
     with open(LOG_FILE, "w", encoding="utf-8") as logf:
         logf.write(f"Starting validation of {total} streams...\n")
+        print(f"Starting validation of {total} streams...")
 
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            future_to_entry = {executor.submit(validate_entry, entry): entry for entry in all_streams}
-            for i, future in enumerate(as_completed(future_to_entry), 1):
-                name, url, status = future.result()
+            future_to_stream = {executor.submit(validate_stream, url): (name, url) for name, url in filtered_streams}
+            for i, future in enumerate(as_completed(future_to_stream), 1):
+                name, url = future_to_stream[future]
+                try:
+                    result = future.result()
+                except Exception:
+                    result = False
+
+                status = "VALID" if result else "INVALID"
                 logf.write(f"Testing [{i}/{total}]: {name} ... {status}\n")
                 print(f"Testing [{i}/{total}]: {name} ... {status}")
-                if status == "VALID":
+
+                if result:
                     valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
 
         logf.write(f"Total valid streams: {len(valid_streams)}\n")
@@ -141,8 +141,16 @@ def main():
         for entry in valid_streams:
             outf.write(entry)
 
-    print(f"\nValidation complete. {len(valid_streams)} valid streams saved to '{OUTPUT_PLAYLIST}'.")
-    print(f"Log file: '{LOG_FILE}'")
+    # Copier au root pour GitHub Pages
+    cp_root = "playlist.m3u"
+    with open(cp_root, "w", encoding="utf-8") as outf:
+        outf.write("#EXTM3U\n")
+        for entry in valid_streams:
+            outf.write(entry)
+
+    print(f"Playlist generated: {OUTPUT_PLAYLIST}")
+    print(f"Playlist for GitHub Pages: {cp_root}")
+    print(f"Validation log: {LOG_FILE}")
 
 if __name__ == "__main__":
     main()
