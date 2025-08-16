@@ -6,33 +6,33 @@ Lyon
 Marseille
 Genève
 Bruxelles
-Luxembourg
+Lausanne
+Bordeaux
+Toulouse
 
 # Villes anglophones
 Toronto
 Vancouver
 Ottawa
-Montreal (pour anglophones locaux)
+London
+Manchester
+Edinburgh
 New York
 Los Angeles
 Chicago
 Miami
+Boston
 San Francisco
-London
-Manchester
-Birmingham
 Sydney
 Melbourne
 Auckland
 
 # Villes hispanophones
 Mexico City
-Guadalajara
-Monterrey
 Lima
 Buenos Aires
-Santiago
 Madrid
-Barcelona
-Bogotá
-Caracas
+Barcelone
+Santiago
+Bogota
+Montevideo
