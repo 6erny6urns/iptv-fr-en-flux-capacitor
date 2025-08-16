@@ -1,0 +1,38 @@
+# Villes francophones
+Montréal
+Québec
+Paris
+Lyon
+Marseille
+Genève
+Bruxelles
+Luxembourg
+
+# Villes anglophones
+Toronto
+Vancouver
+Ottawa
+Montreal (pour anglophones locaux)
+New York
+Los Angeles
+Chicago
+Miami
+San Francisco
+London
+Manchester
+Birmingham
+Sydney
+Melbourne
+Auckland
+
+# Villes hispanophones
+Mexico City
+Guadalajara
+Monterrey
+Lima
+Buenos Aires
+Santiago
+Madrid
+Barcelona
+Bogotá
+Caracas
