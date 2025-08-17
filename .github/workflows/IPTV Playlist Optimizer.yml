@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       max_urls_per_channel:
-        description: 'Nombre maximum d\'URLs par chaîne'
+        description: 'Nombre maximum d URLs par chaine'
         required: false
         default: '3'
         type: string
       max_workers:
-        description: 'Nombre de workers parallèles'
+        description: 'Nombre de workers paralleles'
         required: false
         default: '10'
         type: string
@@ -37,7 +37,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        # Récupère tout l'historique pour pouvoir faire des commits
+        # Recupere tout l historique pour pouvoir faire des commits
         fetch-depth: 0
     
     - name: Set up Python
@@ -50,7 +50,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install requests
-        # Installer d'autres dépendances si nécessaire
+        # Installer d autres dependances si necessaire
         
     - name: Create directories
       run: |
@@ -63,13 +63,13 @@ jobs:
       run: |
         # Remplacez ces URLs par vos vraies sources M3U
         # Ou uploadez vos fichiers M3U dans le dossier m3u_sources/
-        echo "Téléchargement des sources M3U..."
+        echo "Telechargement des sources M3U..."
         
-        # Exemple de téléchargement (décommentez et adaptez)
+        # Exemple de telechargement (decommentez et adaptez)
         # curl -s "https://example.com/playlist1.m3u" -o m3u_sources/source1.m3u || true
         # curl -s "https://example.com/playlist2.m3u" -o m3u_sources/source2.m3u || true
         
-        # Pour le moment, créer un fichier exemple si aucun fichier n'existe
+        # Pour le moment, creer un fichier exemple si aucun fichier n existe
         if [ ! -f m3u_sources/*.m3u ]; then
           echo "#EXTM3U" > m3u_sources/example.m3u
           echo "#EXTINF:-1,Example Channel" >> m3u_sources/example.m3u
@@ -77,12 +77,12 @@ jobs:
         fi
         
         echo "Fichiers M3U disponibles:"
-        ls -la m3u_sources/ || echo "Aucun fichier M3U trouvé"
+        ls -la m3u_sources/ || echo "Aucun fichier M3U trouve"
     
     - name: Create default channels CSV if missing
       run: |
         if [ ! -f data/channels_keywords.csv ]; then
-          echo "Création du fichier channels_keywords.csv par défaut..."
+          echo "Creation du fichier channels_keywords.csv par defaut..."
           cat > data/channels_keywords.csv << 'EOF'
         channel,keyword
         TF1,tf1|tf 1
@@ -106,12 +106,12 @@ jobs:
         France 24,france24|france 24
         TV5,tv5monde|tv5
         EOF
-          echo "Fichier channels_keywords.csv créé avec des chaînes françaises par défaut"
+          echo "Fichier channels_keywords.csv cree avec des chaines francaises par defaut"
         fi
     
     - name: Run IPTV Optimizer
       run: |
-        echo "Démarrage de l'optimiseur IPTV..."
+        echo "Demarrage de l optimiseur IPTV..."
         python iptv_optimizer.py \
           --m3u-dir m3u_sources \
           --channels-csv data/channels_keywords.csv \
@@ -122,7 +122,7 @@ jobs:
           
     - name: Generate summary
       run: |
-        echo "## 📺 IPTV Playlist Optimizer - Rapport d'exécution" > summary.md
+        echo "## 📺 IPTV Playlist Optimizer - Rapport d execution" > summary.md
         echo "**Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> summary.md
         echo "**Commit:** ${{ github.sha }}" >> summary.md
         echo "" >> summary.md
@@ -132,31 +132,31 @@ jobs:
           urls_count=$(grep -c "^http" playlist/playlist_filtered.m3u || echo "0")
           file_size=$(du -h playlist/playlist_filtered.m3u | cut -f1)
           
-          echo "### ✅ Résultats" >> summary.md
-          echo "- **Chaînes trouvées:** $channels_count" >> summary.md
+          echo "### ✅ Resultats" >> summary.md
+          echo "- **Chaines trouvees:** $channels_count" >> summary.md
           echo "- **URLs valides:** $urls_count" >> summary.md  
           echo "- **Taille du fichier:** $file_size" >> summary.md
           echo "" >> summary.md
           
-          echo "### 📋 Aperçu des chaînes" >> summary.md
+          echo "### 📋 Apercu des chaines" >> summary.md
           echo '```' >> summary.md
           grep "^#EXTINF" playlist/playlist_filtered.m3u | head -10 | sed 's/#EXTINF:-1[^,]*,/- /' >> summary.md
           if [ $channels_count -gt 10 ]; then
-            echo "... et $(($channels_count - 10)) autres chaînes" >> summary.md
+            echo "... et $(($channels_count - 10)) autres chaines" >> summary.md
           fi
           echo '```' >> summary.md
         else
           echo "### ❌ Erreur" >> summary.md
-          echo "Aucune playlist générée. Vérifiez les logs." >> summary.md
+          echo "Aucune playlist generee. Verifiez les logs." >> summary.md
         fi
         
         echo "" >> summary.md
-        echo "### 📁 Fichiers générés" >> summary.md
+        echo "### 📁 Fichiers generes" >> summary.md
         echo '```' >> summary.md
-        ls -la playlist/ logs/ 2>/dev/null || echo "Aucun fichier généré"
+        ls -la playlist/ logs/ 2>/dev/null || echo "Aucun fichier genere"
         echo '```' >> summary.md
         
-        # Afficher le résumé
+        # Afficher le resume
         cat summary.md
         
     - name: Upload logs as artifact
@@ -184,10 +184,10 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        # Ajouter les fichiers générés
+        # Ajouter les fichiers generes
         git add playlist/playlist_filtered.m3u summary.md
         
-        # Commit seulement s'il y a des changements
+        # Commit seulement s il y a des changements
         if ! git diff --staged --quiet; then
           git commit -m "🔄 Mise à jour playlist IPTV - $(date '+%Y-%m-%d %H:%M:%S')"
           git push
@@ -198,7 +198,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Job optionnel pour notifier en cas d'échec
+  # Job optionnel pour notifier en cas d echec
   notify-failure:
     needs: optimize-playlist
     runs-on: ubuntu-latest
@@ -211,15 +211,15 @@ jobs:
           github.rest.issues.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            title: '🚨 IPTV Optimizer - Échec d\'exécution',
-            body: `## Détails de l'échec
+            title: '🚨 IPTV Optimizer - Echec d execution',
+            body: `## Details de l echec
             
             - **Workflow:** ${{ github.workflow }}
             - **Run ID:** ${{ github.run_id }}
             - **Commit:** ${{ github.sha }}
             - **Date:** ${new Date().toISOString()}
             
-            Vérifiez les logs dans les artifacts ou l'onglet Actions.
+            Verifiez les logs dans les artifacts ou l onglet Actions.
             
-            [Voir les détails](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            [Voir les details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
           })
