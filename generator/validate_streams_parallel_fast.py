@@ -1,166 +1,144 @@
-import csv
 import os
-import sys
+import re
 import requests
-import subprocess
-from urllib.parse import urlparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
+import concurrent.futures
+from pathlib import Path
 
 # --- CONFIGURATION ---
-INPUT_CSV = "data/sources.csv"
-TOP_CHANNELS_FILE = "data/top_channels.txt"
-TOP_CITIES_FILE = "data/top_cities50.txt"
-OUTPUT_DIR = "playlist"
-OUTPUT_PLAYLIST = os.path.join(OUTPUT_DIR, "playlist_filtered.m3u")
-LOG_FILE = "validation_log.txt"
-TIMEOUT = 3  # secondes pour ffprobe
-MAX_WORKERS = 25
+MIN_REQUIRED = 25
+MAX_ATTEMPTS = 2
+TIMEOUTS = [10, 20]  # 10s d’abord, puis 20s
+INPUT_CSV = "data/sources.csv"  # URLs de playlists
+LOCAL_DIR = r"C:\Users\berny\OneDrive\Documents\0000000000_PROJETS\M3U"
+OUTPUT_M3U = "finale.m3u"
 
-# --- UTILS ---
-def check_ffprobe():
-    try:
-        subprocess.run(["ffprobe", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        return True
-    except Exception:
-        return False
+# Mots-clés principaux et variantes (5 max par mot clé)
+KEYWORDS = {
+    "TF1": ["TF1", "T F1", "TF-1", "TF_1", "La Une"],
+    "France 2": ["France 2", "FR2", "France2", "F2", "Deux"],
+    "France 3": ["France 3", "FR3", "France3", "F3", "Trois"],
+    "M6": ["M6", "M 6", "M-6", "M_6", "Métropole 6"],
+    "Arte": ["Arte", "ARTE", "ArteTV", "Arte-TV", "La Sept"],
+    "Canal+": ["Canal+", "Canal Plus", "C+", "Canal+", "Canal_Plus"],
+    "CNEWS": ["CNEWS", "C News", "C-News", "iTélé", "Canal News"],
+    "LCI": ["LCI", "La Chaîne Info", "LCI-TV", "LCI_TV", "LCI Info"],
+    "BFMTV": ["BFMTV", "BFM TV", "BFM-TV", "BFM_TV", "BFM"],
+    "TV5": ["TV5", "TV5Monde", "TV 5", "TV-5", "TV_Cinq"],
+    "RMC": ["RMC", "RMC Découverte", "RMC Story", "RMC-S", "RMC_D"],
+    "France 24": ["France 24", "France24", "F24", "FR24", "France_VingtQuatre"],
+    "Euronews": ["Euronews", "Euro news", "Euro-news", "ENews", "Euronews TV"],
+    "CNN": ["CNN", "C N N", "CNN International", "CNNI", "CNN-Intl"],
+    "BBC": ["BBC", "BBC News", "BBC-World", "BBC_World", "British Broadcasting"],
+    "CTV": ["CTV", "C TV", "C-TV", "CTV Canada", "CTV_News"],
+    "CBC": ["CBC", "CBC News", "CBC-TV", "Radio-Canada", "Canadian Broadcasting"],
+    "Global": ["Global", "Global News", "Global-TV", "Global_TV", "Global Canada"]
+}
 
-def download_m3u(url):
+# ---------------------------------------------------
+
+def load_sources_online():
+    """Charge les URLs depuis le fichier CSV sources."""
+    urls = []
+    if os.path.exists(INPUT_CSV):
+        with open(INPUT_CSV, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and line.startswith("http"):
+                    urls.append(line)
+    return urls
+
+def load_sources_local(limit=25):
+    """Charge des fichiers M3U depuis un dossier local."""
+    m3u_files = list(Path(LOCAL_DIR).rglob("*.m3u"))
+    m3u_files = m3u_files[:limit]  # prend les 25 premiers
+    urls = []
+    for file in m3u_files:
+        with open(file, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("http"):
+                    urls.append(line)
+    return urls
+
+def fetch_playlist(url, timeout):
+    """Télécharge une playlist M3U et retourne les lignes valides."""
     try:
-        resp = requests.get(url, timeout=5)
+        resp = requests.get(url, timeout=timeout)
         resp.raise_for_status()
         return resp.text.splitlines()
     except Exception:
         return []
 
-def extract_urls(csv_path):
-    if not os.path.isfile(csv_path):
-        print(f"ERROR: CSV source file not found: {csv_path}", file=sys.stderr)
-        sys.exit(1)
-    urls = []
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if "url" in row and row["url"].strip():
-                name = row.get("name", "UNKNOWN").strip()
-                url = row["url"].strip()
-                urls.append((name, url))
-    return urls
-
-def parse_m3u_recursive(url, parent_name):
-    urls = []
-    lines = download_m3u(url)
-    for line in lines:
-        line = line.strip()
-        if not line or line.startswith("#"):
+def validate_stream(url, timeout):
+    """Teste un flux avec un timeout progressif."""
+    for t in TIMEOUTS:
+        try:
+            resp = requests.get(url, stream=True, timeout=t)
+            if resp.status_code == 200:
+                return True
+        except Exception:
             continue
-        if line.lower().endswith(".m3u") or line.lower().endswith(".m3u8"):
-            urls.extend(parse_m3u_recursive(line, parent_name))
-        elif line.startswith("http"):
-            urls.append((parent_name, line))
-    return urls
-
-def load_list_file(path):
-    if not os.path.isfile(path):
-        print(f"ERROR: List file not found: {path}", file=sys.stderr)
-        sys.exit(1)
-    with open(path, "r", encoding="utf-8") as f:
-        return [line.strip().lower() for line in f if line.strip()]
-
-def url_alive(url):
-    try:
-        resp = requests.head(url, timeout=1, allow_redirects=True)
-        return resp.status_code == 200
-    except Exception:
-        return False
-
-def validate_stream(url):
-    if not url_alive(url):
-        return False
-    try:
-        result = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=format_name",
-             "-of", "default=nw=1", url],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=TIMEOUT,
-            text=True
-        )
-        output = result.stdout.lower()
-        if "format_name=" in output:
-            return True
-    except Exception:
-        pass
     return False
 
-# --- MAIN ---
+def filter_by_keywords(lines):
+    """Garde uniquement les chaînes correspondant aux mots-clés définis."""
+    results = []
+    for i, line in enumerate(lines):
+        if line.startswith("#EXTINF"):
+            for channel, variants in KEYWORDS.items():
+                if any(v.lower() in line.lower() for v in variants):
+                    if i + 1 < len(lines):
+                        url = lines[i + 1].strip()
+                        results.append((channel, line, url))
+    return results
+
 def main():
-    if not check_ffprobe():
-        print("ERROR: ffprobe not found or not executable. Install ffprobe.", file=sys.stderr)
-        sys.exit(1)
+    all_results = []
+    attempt = 0
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    for attempt in range(MAX_ATTEMPTS):
+        print(f"\n--- Tentative {attempt+1} ---")
 
-    top_channels = load_list_file(TOP_CHANNELS_FILE)
-    top_cities = load_list_file(TOP_CITIES_FILE)
+        if attempt == 0:
+            urls = load_sources_online()
+        else:
+            urls = load_sources_local()
 
-    sources = extract_urls(INPUT_CSV)
-    all_streams = []
+        if not urls:
+            print("⚠️ Aucune source trouvée.")
+            continue
 
-    # Extraire tous les flux directs à partir des M3U
-    for name, url in sources:
-        # Filtrer uniquement les chaînes et villes ciblées
-        if any(tc in name.lower() for tc in top_channels) or any(city in name.lower() for city in top_cities):
-            all_streams.extend(parse_m3u_recursive(url, name))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_url = {executor.submit(fetch_playlist, u, TIMEOUTS[0]): u for u in urls}
+            for future in concurrent.futures.as_completed(future_to_url):
+                lines = future.result()
+                if lines:
+                    all_results.extend(filter_by_keywords(lines))
 
-    if not all_streams:
-        print("Aucun flux trouvé correspondant aux chaînes et villes ciblées.")
-        return
+        # Validation des flux trouvés
+        valid_results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(validate_stream, url, TIMEOUTS[0]): (ch, info, url) for ch, info, url in all_results}
+            for future in concurrent.futures.as_completed(futures):
+                if future.result():
+                    valid_results.append(futures[future])
 
-    valid_streams = []
-    total_streams = len(all_streams)
+        all_results = list({url: (ch, info, url) for ch, info, url in valid_results}.values())  # supprime doublons
 
-    # Compteurs pour affichage temps réel
-    valid_count = 0
-    invalid_count = 0
-    lock = threading.Lock()
+        print(f"Chaînes valides trouvées après tentative {attempt+1}: {len(all_results)}")
 
-    with open(LOG_FILE, "w", encoding="utf-8") as logf, ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(validate_stream, url): (name, url) for name, url in all_streams}
+        if len(all_results) >= MIN_REQUIRED:
+            break
 
-        for i, future in enumerate(as_completed(futures), 1):
-            name, url = futures[future]
-            try:
-                valid = future.result()
-            except Exception:
-                valid = False
+    # Écriture du fichier final
+    with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
+        f.write("#EXTM3U\n")
+        for ch, info, url in all_results:
+            f.write(f"{info}\n{url}\n")
 
-            with lock:
-                if valid:
-                    valid_streams.append(f"#EXTINF:-1,{name}\n{url}\n")
-                    valid_count += 1
-                    status = "VALID"
-                else:
-                    invalid_count += 1
-                    status = "INVALID"
+    print(f"\n✅ Résultat final : {len(all_results)} chaînes valides trouvées.")
+    print(f"📂 Playlist générée : {OUTPUT_M3U}")
 
-                print(f"[{i}/{total_streams}] {status}: {name} | Valid: {valid_count} | Invalid: {invalid_count}")
-                logf.write(f"{status} [{i}/{total_streams}]: {name} -> {url}\n")
-
-    # Génération playlist M3U
-    with open(OUTPUT_PLAYLIST, "w", encoding="utf-8") as outf:
-        outf.write("#EXTM3U\n")
-        for entry in valid_streams:
-            outf.write(entry)
-
-    # Copier au root pour GitHub Pages
-    try:
-        os.replace(OUTPUT_PLAYLIST, "playlist.m3u")
-    except Exception:
-        pass
-
-    print(f"\nValidation terminée. {len(valid_streams)} flux valides sauvegardés.")
-    print(f"Log: {LOG_FILE}")
 
 if __name__ == "__main__":
     main()
