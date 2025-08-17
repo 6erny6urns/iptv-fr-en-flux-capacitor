@@ -66,36 +66,3 @@ Canal 9
 Canal 7
 Televisión Nacional
 Movistar+
-Montréal
-Québec
-Paris
-Lyon
-Marseille
-Genève
-Bruxelles
-Lausanne
-Bordeaux
-Toulouse
-Toronto
-Vancouver
-Ottawa
-London
-Manchester
-Edinburgh
-New York
-Los Angeles
-Chicago
-Miami
-Boston
-San Francisco
-Sydney
-Melbourne
-Auckland
-Mexico City
-Lima
-Buenos Aires
-Madrid
-Barcelone
-Santiago
-Bogota
-Montevideo
