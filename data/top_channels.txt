@@ -1,48 +1,101 @@
 TVA
-ICI Radio-Canada
+Radio-Canada
 Noovo
 Télé-Québec
 LCN
+VRAK
+Canal D
+Canal Vie
+TéléMag
+TV5 Monde
+Unis TV
+Télétoon
 RDI
+TVA Sports
+ICI Télévision
+AMI Télé
+Historia
+Zeste
+Prise 2
+Cinépop
 CBC
 CTV
 Global
-Citytv
-TF1
-France 2
-France 3
-France 5
-M6
-6ter
-Arte
-Canal+
-TMC
-TFX
-C8
-CStar
-LCI
-BFMTV
-CNEWS
-TV5 Monde
-Paris Première
-RTL9
-ABC
-NBC
-CBS
-FOX
-PBS
-CNN
-MSNBC
-Fox News
-WPIX
-My9
-NY1
-Univision
-Telemundo
-BBC One
-BBC Two
-BBC News
+TSN
+Sportsnet
+CBC News Network
+BBC
 ITV
 Channel 4
-Channel 5
 Sky News
+Sky Sports
+CNN
+Fox News
+ESPN
+HBO
+Discovery Channel
+History Channel
+National Geographic
+Food Network
+HGTV
+Nickelodeon
+Cartoon Network
+AMC
+FX
+PBS
+Comedy Central
+The Weather Channel
+Televisa
+TV Azteca
+Univision
+Telemundo
+Caracol TV
+RCN
+Canal 13
+Telefe
+América TV
+TVE
+Antena 3
+RTVE
+La Sexta
+Atreseries
+Mega
+Chilevisión
+TVN
+Canal 9
+Canal 7
+Televisión Nacional
+Movistar+
+Montréal
+Québec
+Paris
+Lyon
+Marseille
+Genève
+Bruxelles
+Lausanne
+Bordeaux
+Toulouse
+Toronto
+Vancouver
+Ottawa
+London
+Manchester
+Edinburgh
+New York
+Los Angeles
+Chicago
+Miami
+Boston
+San Francisco
+Sydney
+Melbourne
+Auckland
+Mexico City
+Lima
+Buenos Aires
+Madrid
+Barcelone
+Santiago
+Bogota
+Montevideo
