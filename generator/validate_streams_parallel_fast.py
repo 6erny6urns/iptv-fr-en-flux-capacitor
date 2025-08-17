@@ -150,4 +150,21 @@ def main():
                         found_channels.add(ch)
 
         all_results.extend(valid_results)
-        print(f"Chaînes valides cumulées : {
+        print(f"Chaînes valides cumulées : {len(all_results)}")
+
+        if len(all_results) >= MIN_REQUIRED:
+            break
+
+    # Écriture du fichier final
+    with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
+        f.write("#EXTM3U\n")
+        for ch, info, url in all_results:
+            f.write(f"{info}\n{url}\n")
+
+    print(f"\n✅ Résultat final : {len(all_results)} chaînes valides trouvées.")
+    print("📌 Liste des chaînes trouvées :")
+    for ch, _, _ in all_results:
+        print(f"- {ch}")
+
+if __name__ == "__main__":
+    main()
