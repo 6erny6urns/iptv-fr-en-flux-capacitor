@@ -8,61 +8,52 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # sécurité, max 60 minutes
+    timeout-minutes: 15  # sécurité max 15 minutes
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.x
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
-          pip install requests m3u8
+          pip install requests
 
-      - name: Create output directory if missing
+      - name: Create output directory
         run: mkdir -p playlist
 
       - name: List repo structure (debug)
         run: ls -R
 
-      - name: Run stream validation script
+      - name: Run IPTV validation script
         run: |
-          echo "Starting validation script at $(date)"
-          START=$(date +%s)
+          echo "=== START validation ==="
           python generator/validate_streams_parallel_fast.py
-          END=$(date +%s)
-          ELAPSED=$((END-START))
-          echo "Validation script completed in ${ELAPSED} seconds"
 
-      - name: Copy playlist to repo root for GitHub Pages
+      - name: Check output playlist
         run: |
           if [ ! -f "playlist/playlist_filtered.m3u" ]; then
-            echo "ERREUR: playlist/playlist_filtered.m3u introuvable"
+            echo "ERREUR: playlist_filtered.m3u introuvable"
             exit 1
           fi
           cp playlist/playlist_filtered.m3u playlist.m3u
           echo "Copié playlist/playlist_filtered.m3u -> playlist.m3u"
 
-      - name: Commit and push playlist + logs
+      - name: Commit and push results
         env:
           PAT_FLUX_TOKEN: ${{ secrets.PAT_FLUX_TOKEN }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-
           git fetch origin main
           git checkout main
           git pull --rebase origin main || true
-
           git add playlist/playlist_filtered.m3u playlist.m3u validation_log.txt || echo "No changes to add"
-          git commit -m "Automated playlist update with validated live streams" || echo "No changes to commit"
-
+          git commit -m "Automated playlist update with validated streams" || echo "No changes to commit"
           git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
           git push origin main
