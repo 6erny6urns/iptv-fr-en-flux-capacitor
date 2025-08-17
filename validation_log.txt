@@ -4,3 +4,7 @@ Found 0 M3U files locally.
 URLs after keyword filtering: 0
 Total valid URLs: 0
 Validation finished.
+Found 0 M3U files locally.
+URLs after keyword filtering: 0
+Total valid URLs: 0
+Validation finished.
