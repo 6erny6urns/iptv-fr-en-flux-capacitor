@@ -1,4 +1,3 @@
-# Villes francophones
 Montréal
 Québec
 Paris
@@ -9,8 +8,6 @@ Bruxelles
 Lausanne
 Bordeaux
 Toulouse
-
-# Villes anglophones
 Toronto
 Vancouver
 Ottawa
@@ -26,8 +23,6 @@ San Francisco
 Sydney
 Melbourne
 Auckland
-
-# Villes hispanophones
 Mexico City
 Lima
 Buenos Aires
