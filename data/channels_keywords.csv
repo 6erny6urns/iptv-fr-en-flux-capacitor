@@ -1,20 +1,122 @@
-Channel,Keyword1,Keyword2,Keyword3,Keyword4,Keyword5
-TF1,TF1,T F1,TF-1,TF_1,La Une
+TF1,TF1,TF-1,TF_1,La Une,Télévision française
 France 2,France 2,FR2,France2,F2,Deux
-France 3,France 3,FR3,France3,F3,Trois
-France 4,France 4,FR4,France4,F4,Quatre
-France 5,France 5,FR5,France5,F5,Cinq
-M6,M6,M 6,M-6,M_6,Métropole 6
-Arte,Arte,ARTE,ArteTV,Arte-TV,La Sept
-6TER,6TER,6 TER,6-Ter,SixTer,Six Ter
-W9,W9,W 9,W-Neuf,W_Nine,Neuf
-TMC,TMC,T M C,T-MC,TMC TV,Télé Monte Carlo
-TFX,TFX,T F X,TF-X,TFX TV,TFX_Channel
-Chérie 25,Chérie 25,Cherie25,Ch25,Cherie,Chérie25TV
-RMC Story,RMC Story,RMCStory,RMC-S,RMC_Story,RMC S
-RMC Découverte,RMC Découverte,RMCDecouverte,RMC-D,RMC_D,RMC Dec
-LCI,LCI,La Chaîne Info,LCI-TV,LCI_TV,LCI Info
-BFM TV,BFMTV,BFM TV,BFM-TV,BFM_TV,BFM
-CNews,CNEWS,C News,C-News,iTélé,Canal News
-Franceinfo,Franceinfo,France Info,FInfo,FranceInfoTV,Info France
-...
+France 3,France 3,FR3,France3,Télé France 3,Régionale
+France 4,France 4,FR4,France4,Télé France 4,Jeunesse
+France 5,France 5,FR5,France5,Télé France 5,Documentaire
+M6,M6,Match 6,M_6,M-six,Télévision française
+Arte,Arte,Arte TV,Arte France,Arte Europe,Télévision culturelle
+6TER,6TER,6 Ter,Six Ter,6T,Télévision familiale
+W9,W9,W Neuf,Canal W9,Télévision musicale,Privée
+TMC,TMC,Télé Monte Carlo,Télé Monte-Carlo,Télévision Monaco,Côte d'Azur
+TFX,TFX,TFX TV,Télé TFx,Télévision jeune adulte,Privée
+Chérie 25,Chérie 25,Chérie,Chérie TV,Chérie Vingt-cinq,Télévision féminine
+RMC Story,RMC Story,RMC,Histoire,RMC Découverte,Chaîne documentaire
+RMC Découverte,RMC Découverte,RMC Doc,RMC,Découverte Documentaire,Documentaire
+LCI,LCI,La Chaîne Info,LCI News,Nouvelle Chaîne Info,Télévision info
+BFM TV,BFM TV,BFM,Télévision info,BFM Business,Actualités
+CNews,CNews,C News,CNews TV,Télévision info,CNews Actualités
+Franceinfo,Franceinfo,France Info,FInfo,L'info en continu,Télé info
+LCP,LCP,La Chaîne Parlementaire,LCP AN,Télé parlementaire,LCP Assemblée
+Public Sénat,Public Sénat,PublicSenat,Télé parlementaire,Assemblée Nationale,Sénat
+CANAL+,Canal+,Canal Plus,Canal Plus TV,C+ Privée,Chaîne cinéma
+Paris Première,Paris Première,Paris 1,Paris 1ère,Télé parisienne,Découverte
+Téva,Téva,Téva TV,Téva Séries,Téva Magasins,Télé féminine
+TV Breizh,TV Breizh,TVBretagne,Breizh TV,Télé Bretagne,Culture bretonne
+Gulli,Gulli,Gulli TV,Gulli Jeunesse,Télé jeunesse,Gulli Family
+Canal J,Canal J,Canal Jeux,Télé jeunesse,Jeunesse,CJ
+CStar,CStar,C Star,CStar TV,Musique,Vidéos musicales
+TV5 Monde,TV5 Monde,TV5,TV5Monde International,Télé francophone,TV internationale
+TV8 Mont-Blanc,TV8 Mont-Blanc,TV8,Télé Mont-Blanc,Région Mont-Blanc,Savoie
+France 24,France 24,FR24,F24,France Vingt-Quatre,Télé info internationale
+TVA,TVA,TVA Network,TVA Quebec,TVA Télévision,Télé québécoise
+TVA Sports,TVA Sports,Télé TVA Sports,Sports Québec,Télé sports,TVA Sport
+LCN,LCN,La Chaîne Nouvelles,LCN Québec,Télé info Québec,LCN Actualités
+Noovo,Noovo,Noovo TV,Noovo Québec,TVA Noovo,Télé jeune
+ICI Radio-Canada,ICI Radio-Canada,Radio-Canada,Radio Canada,Radio Canada Télévision,RC
+ICI Télé,ICI Télé,Télé ICI,Télévision Radio-Canada,TVI Québec,Télé
+Télé-Québec,Télé-Québec,TéléQuébec,Télé Québécois,Télé locale,TQ
+Unis TV,Unis TV,Unis Télévision,Canal Unis,TV communautaire,Unis
+VRAK,VRAK,Vrak TV,Vrak.tv,Télé jeunesse Québécois,Téléréalité
+Télétoon,Télétoon,Télé Toon,Télétoon Canada,Télétoon Français,Télé jeunesse
+Prise 2,Prise 2,Prise Deux,Télé cinéma,Télé archives,P2
+AMI-télé,AMI-télé,Accessible Media Inc,AMI Télévision,Télé accessible,Télé handicap
+Toute l’Histoire,Toute l’Histoire,Histoire,Télé histoire,Histoire TV,Télé documentaire
+Planète+,Planète+,Planète Plus,Planète Télévision,Documentaire,Télé nature
+Historia,Historia,Télé Historia,Télé histoire,Télé documentaire,History Channel francophone
+Zeste,Zeste,Zeste TV,Télé cuisine,Télé gustative,Télé gastronomie
+Cinépop,Cinépop,Ciné Pop,Télé cinéma,Télé films classiques,CinéPop
+Canal D,Canal D,Canal Documentaire,DOC TV,Documentaire,Télé documentaire
+Canal Vie,Canal Vie,Canal Life,Télé vie,Télé famille,Famille TV
+CBC,CBC,CBC TV,CBC Television,Canadian Broadcasting Corporation,Télé Canada
+CBC News Network,CBC News Network,CBC News,CBC Actualités,Télé info,CNBC Canada
+CTV,CTV,CTV Television,Canadian Television,Télé CTV,Télé privée
+CTV News Channel,CTV News Channel,CTV News Channel Канал,CTV News,CNBC Canada,Télé info
+Global,Global,Global TV,Global Television,Télé privée,TV Canada
+Citytv,Citytv,City TV,City Channel,Télé privée,Télé régionale
+CHEK,CHEK TV,CHEK Television,Television CHEK,Télé Canada,TV régionale
+TVA Montreal,TVA Montreal,TVA Montréal,TVA Quebec,TVA Québec Channel,Télé privée
+TSN,TSN,The Sports Network,Télé sports,Télé canadien,Sports TV
+Sportsnet,Sportsnet,Sports Net,Télé sports,Télé canadien,Sports Network
+RDS,RDS,Radio-Canada Sports,Télé sports,Télé Québec,Sports réseau
+FOX,FOX,FOX TV,FOX Network,Télé US,FOX Channel
+NBC,NBC,NBC Television,NBC TV,Télé US,National Broadcasting Company
+CBS,CBS,CBS Television,CBS TV,Télé US,CBS Network
+ABC,ABC,American Broadcasting Company,ABC TV,Télé US,ABC Channel
+PBS,PBS,Public Broadcasting Service,PBS TV,Télé US,TV publique
+CW,CW,CW Network,CW Television,Télé US,CW Channel
+CNN,CNN,Cable News Network,CNN TV,Télé info,Télé US
+CNBC,CNBC,CNBC TV,CNBC Channel,Business news,Télé US
+MSNBC,MSNBC,MSNBC TV,Télé info,Télé US,Télé info politique
+BBC One,BBC One,BBC1,BBC United Kingdom,BBC TV,Chaîne UK
+BBC Two,BBC Two,BBC2,BBC United Kingdom,Télé UK,BBC TV
+BBC News,BBC News,BBC News Channel,BBC Info,BBC Télé Info,Chaîne info UK
+ITV,ITV,Independent Television,ITV UK,ITV Channel,Chaîne UK
+ITV2,ITV2,Independent Television 2,ITV 2,ITV 2 UK,Télélympique
+ITV3,ITV3,Independent Television 3,ITV 3,ITV 3 UK,Téléréalité
+ITV4,ITV4,Independent Television 4,ITV 4,ITV 4 UK,Sports UK
+Channel 4,Channel 4,C4,Channel Four,C4 UK,Chaîne UK
+Channel 5,Channel 5,C5,C5 UK,Channel Five,Chaîne UK
+Sky News,Sky News,Sky News Channel,Sky,Télé info UK,Sky TV
+Sky Sports,Sky Sports,Sky Sport Channel,Sky Sports UK,Sky Sports TV,Sports UK
+E4,E4,E Four,E4 UK,Télé jeunes,Télé UK
+More4,More4,More Four,More 4 UK,Télé UK,Chaîne divertissement
+Discovery Channel,Discovery Channel,Discovery,Discovery TV,Télé documentaire,Télé nature
+History Channel,History Channel,History TV,Télé histoire,Télé documentaire,Histoire
+National Geographic,National Geographic,NGC,Télé nature,Télé documentaire,Science
+Eurosport,Eurosport,Eurosport Channel,Sports européens,Télé sport,Sports
+ESPN,ESPN,ESPN Network,Sports US,Télé sport,Télé américain
+FOX Sports,FOX Sports,FOX Sports Network,Télé sport,Sports US,Sports réseau
+HBO,HBO,HBO TV,HBO Network,Télé US,Cinéma US
+Showtime,Showtime,Showtime TV,Télé cinéma,Cinéma US,Cinéma privé
+Food Network,Food Network,FN TV,Cuisine,Télé gastronomie,Télé cuisine
+HGTV,HGTV,Home and Garden Television,Cuisine,Télé décoration,Maison
+Nickelodeon,Nickelodeon,Nick TV,Télé jeunesse,Télé dessin animé,Jeunesse
+Cartoon Network,Cartoon Network,CN TV,Cartoon,Télé jeunesse,Animation
+FX,FX,FX TV,Télé US,Série,Télé drame
+AMC,AMC,AMC TV,Séries US,Cinéma US,Télé
+Comedy Central,Comedy Central,Comedy Central TV,Télé humour,Télé comédie,Humour
+The Weather Channel,The Weather Channel,TWC,Télé météo,Télé information,Météo
+Univision,Univision,Univision TV,Télé hispanique,Télé US,Hispanique
+Telemundo,Telemundo,Telemundo TV,Télé hispanique,Télé US,Hispanique
+Televisa,Televisa,Televisa TV,Télé mexicaine,Télé hispanique,Sud-Américain
+TV Azteca,TV Azteca,TV Azteca TV,Télé mexicaine,Télé hispanique,Mexique
+Caracol TV,Caracol TV,Caracol Television,Télé colombienne,Télé hispanique,Colombie
+RCN,RCN,RCN TV,Télé colombienne,Télé hispanique,Colombie
+Canal 13,Canal 13,Canal Trece,Télé chilienne,Télé hispanique,Chili
+Telefe,Telefe,Telefe TV,Télé argentine,Télé hispanique,Argentine
+América TV,América TV,América Televisión,Télé péruvienne,Télé Amérique Latine,Perou
+TVE,TVE,TV Española,Télé Espagne,TVE TV,Télévision espagnole
+La 1,La 1,TVE La 1,TVE 1,Télé Espagne,Espagne
+La 2,La 2,TVE La 2,TVE 2,Télé Espagne,Espagne
+Antena 3,Antena 3,Antena Tres,Télé Espagne,Espagne,Canal Espagne
+Cuatro,Cuatro,Cuatro TV,Télé Espagne,Espagne,Canal Espagne
+La Sexta,La Sexta,Sexta,Télé Espagne,Espagne,Canal Espagne
+Mega,Mega,Mega TV,Télé chilienne,Télé Espagne,Espagne
+Atreseries,Atreseries,Atreseries TV,Télé Espagne,Séries Espagne,Espagne
+RTVE,RTVE,RTVE TV,Télé Espagne,Espagne,Canal Espagne
+Movistar+,Movistar Plus,Movistar Plus TV,Télé Espagne,Pay TV,Espagne
+TVN,TVN,Télévision Nationale,Télé chili,Télé Espagne,Chili
+Chilevisión,Chilevisión,Chilevisión TV,Télé chilienne,Télé Espagne,Chili
+Canal 9,Canal 9,Canal Nueve,Télé argentine,Télé Espagne,Argentine
+Canal 7,Canal 7,Canal Siete,Télé argentine,Télé Espagne,Argentine
+Televisión Nacional,Televisión Nacional,TVN,Télé argentine,Télé Espagne,Argentine
