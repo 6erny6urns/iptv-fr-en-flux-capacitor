@@ -1,68 +1,123 @@
-TVA
-Radio-Canada
-Noovo
-Télé-Québec
-LCN
-VRAK
-Canal D
-Canal Vie
-TéléMag
+TF1
+France 2
+France 3
+France 4
+France 5
+M6
+Arte
+6TER
+W9
+TMC
+TFX
+Chérie 25
+RMC Story
+RMC Découverte
+LCI
+BFM TV
+CNews
+Franceinfo
+LCP
+Public Sénat
+CANAL+
+Paris Première
+Téva
+TV Breizh
+Gulli
+Canal J
+Canal+
+CStar
 TV5 Monde
-Unis TV
-Télétoon
-RDI
+TV8 Mont-Blanc
+France 24
+TVA
 TVA Sports
-ICI Télévision
-AMI Télé
+LCN
+Noovo
+ICI Radio-Canada
+ICI Télé
+Télé-Québec
+Unis TV
+VRAK
+Télétoon
+Prise 2
+AMI-télé
+Toute l’Histoire
+Planète+
 Historia
 Zeste
-Prise 2
 Cinépop
+Canal D
+Canal Vie
 CBC
+CBC News Network
 CTV
+CTV News Channel
 Global
+Citytv
+CHEK
+TVA Montreal
 TSN
 Sportsnet
-CBC News Network
-BBC
+RDS
+FOX
+NBC
+CBS
+ABC
+PBS
+CW
+CNN
+CNBC
+MSNBC
+BBC One
+BBC Two
+BBC News
 ITV
+ITV2
+ITV3
+ITV4
 Channel 4
+Channel 5
 Sky News
 Sky Sports
-CNN
-Fox News
-ESPN
-HBO
+E4
+More4
 Discovery Channel
 History Channel
 National Geographic
+Eurosport
+ESPN
+FOX Sports
+HBO
+Showtime
 Food Network
 HGTV
 Nickelodeon
 Cartoon Network
-AMC
 FX
-PBS
+AMC
 Comedy Central
 The Weather Channel
-Televisa
-TV Azteca
 Univision
 Telemundo
+Televisa
+TV Azteca
 Caracol TV
 RCN
 Canal 13
 Telefe
 América TV
 TVE
+La 1
+La 2
 Antena 3
-RTVE
+Cuatro
 La Sexta
-Atreseries
 Mega
-Chilevisión
+Atreseries
+RTVE
+Movistar+
 TVN
+Chilevisión
 Canal 9
 Canal 7
 Televisión Nacional
-Movistar+
