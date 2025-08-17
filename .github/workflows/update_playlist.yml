@@ -2,45 +2,45 @@ name: Update IPTV Playlist
 
 on:
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '0 4 * * *'  # tous les jours à 4h UTC
   workflow_dispatch:
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.x
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
-          pip install aiohttp aiofiles
+          pip install requests
 
-      - name: Run parallel validation script
-        run: |
-          python generator/validate_streams_parallel_fast.py
+      - name: List repo structure
+        run: ls -R
 
-      - name: Copy playlist to repo root
+      - name: Run validation script
+        run: python generator/validate_streams_parallel_final.py
+
+      - name: Copy playlist to root
         run: |
           cp playlist/playlist_filtered.m3u playlist.m3u
 
-      - name: Commit & push updates
+      - name: Commit and push
         env:
           PAT_FLUX_TOKEN: ${{ secrets.PAT_FLUX_TOKEN }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add playlist/playlist_filtered.m3u playlist.m3u validation_log.txt
-          git commit -m "Automated playlist update with validated streams" || echo "No changes"
+          git add playlist/playlist_filtered.m3u playlist.m3u || echo "No changes"
+          git commit -m "Automated playlist update" || echo "Nothing to commit"
           git remote set-url origin https://x-access-token:${PAT_FLUX_TOKEN}@github.com/6erny6urns/iptv-fr-en-flux-capacitor.git
-          git push origin main || echo "Push failed, possible non-fast-forward"
+          git push origin main
