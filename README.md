@@ -1,31 +1,27 @@
-# IPTV Playlist Automation
+# IPTV Playlist Generator
 
-Ce dépôt contient un système automatisé pour générer, valider et mettre à jour une playlist IPTV filtrée, compatible avec MyTVOnline 2.
+Ce projet permet de générer automatiquement une **playlist M3U validée** des chaînes TV que vous souhaitez suivre, prête à être utilisée dans MyTVOnline 2. Il supporte à la fois des sources en ligne et un dossier local de fichiers M3U pour la validation.
 
-## Structure du dépôt
+---
 
-- `data/sources.csv` : Liste des URLs sources IPTV à valider.
-- `generator/validate_streams.py` : Script Python qui teste la validité des flux et génère la playlist filtrée.
-- `playlist/playlist_filtered.m3u` : Playlist filtrée générée automatiquement.
-- `.github/workflows/update_playlist.yml` : Workflow GitHub Actions pour automatiser la validation et la mise à jour quotidienne.
+## Contenu du projet
 
-## Fonctionnement
+- `validate_streams_parallel_fast.py` : script principal pour filtrer et valider les flux IPTV.  
+- `data/sources.csv` : liste des URLs de playlists M3U à analyser.  
+- `data/channels_keywords.csv` : liste des chaînes et leurs variantes/mots-clés (5 max par chaîne).  
+- `C:\Users\berny\OneDrive\Documents\0000000000_PROJETS\M3U` : dossier local contenant des fichiers M3U pour la 2ᵉ passe.  
+- `finale.m3u` : playlist M3U générée avec tous les flux valides.  
 
-1. Le workflow GitHub s'exécute automatiquement chaque jour à 4h UTC (configurable).
-2. Il installe les dépendances nécessaires, notamment `ffprobe`.
-3. Il lance le script de validation des flux qui teste les URLs IPTV dans `data/sources.csv`.
-4. Les flux valides sont compilés dans `playlist/playlist_filtered.m3u`.
-5. Le workflow pousse automatiquement les modifications validées dans le dépôt GitHub.
+---
 
-## Prérequis pour le workflow
+## Pré-requis
 
-- Un Personal Access Token (PAT) GitHub avec le secret `GH_PAT_TOKEN` configuré dans les Secrets du dépôt pour autoriser le push automatique.
-- Le fichier `data/sources.csv` doit être correctement renseigné avec les URLs IPTV à tester.
-- L'outil `ffprobe` est installé et accessible dans le runner GitHub Actions via le workflow.
+- Python 3.9 ou supérieur  
+- Module Python : `requests`  
+- Connexion Internet pour la 1ʳᵉ passe (sources en ligne)  
+- Accès au dossier local de playlists M3U pour la 2ᵉ passe  
 
-## Commandes manuelles
-
-Pour valider localement les flux (nécessite `ffprobe` installé localement) :
+Installation des dépendances :
 
 ```bash
-python generator/validate_streams.py
+pip install requests
