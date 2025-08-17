@@ -3,12 +3,12 @@ name: Update IPTV Playlist
 on:
   schedule:
     - cron: '0 4 * * *'  # tous les jours à 4h UTC
-  workflow_dispatch:     # exécution manuelle
+  workflow_dispatch:     # exécution manuelle possible
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # sécurité pour ne pas dépasser 15 minutes
+    timeout-minutes: 60  # sécurité, max 60 minutes
 
     steps:
       - name: Checkout repository
@@ -24,13 +24,31 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
-          pip install requests
+          pip install requests m3u8
 
-      - name: Create output directory
+      - name: Create output directory if missing
         run: mkdir -p playlist
 
-      - name: Run stream validation script (parallel, fast)
-        run: python generator/validate_streams_parallel_fast.py
+      - name: List repo structure (debug)
+        run: ls -R
+
+      - name: Run stream validation script
+        run: |
+          echo "Starting validation script at $(date)"
+          START=$(date +%s)
+          python generator/validate_streams_parallel_fast.py
+          END=$(date +%s)
+          ELAPSED=$((END-START))
+          echo "Validation script completed in ${ELAPSED} seconds"
+
+      - name: Copy playlist to repo root for GitHub Pages
+        run: |
+          if [ ! -f "playlist/playlist_filtered.m3u" ]; then
+            echo "ERREUR: playlist/playlist_filtered.m3u introuvable"
+            exit 1
+          fi
+          cp playlist/playlist_filtered.m3u playlist.m3u
+          echo "Copié playlist/playlist_filtered.m3u -> playlist.m3u"
 
       - name: Commit and push playlist + logs
         env:
