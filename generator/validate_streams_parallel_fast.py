@@ -1,133 +1,152 @@
+# validate_streams_parallel_fast.py
 import os
-import csv
-import requests
+import glob
 import concurrent.futures
+import time
 from pathlib import Path
+import m3u8
+import requests
 
 # --- CONFIGURATION ---
-MIN_REQUIRED = 25
-MAX_ATTEMPTS = 2
-TIMEOUTS = [10, 20]  # 10s puis 20s
-INPUT_CSV = "data/sources.csv"
-LOCAL_DIR = r"C:\Users\berny\OneDrive\Documents\0000000000_PROJETS\M3U"
-KEYWORDS_CSV = "data/channels_keywords.csv"
-OUTPUT_M3U = "finale.m3u"
+LOCAL_M3U_DIR = r"C:\Users\berny\OneDrive\Documents\0000000000_PROJETS\M3U"
+OUTPUT_DIR = "playlist"
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "playlist_filtered.m3u")
+LOG_FILE = "validation_log.txt"
 
-# --- Charger mots-clés depuis CSV ---
-def load_keywords(csv_file):
-    keywords = {}
-    if not os.path.exists(csv_file):
-        raise FileNotFoundError(f"Fichier keywords introuvable : {csv_file}")
-    with open(csv_file, newline='', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)  # skip header
-        for row in reader:
-            channel = row[0].strip()
-            variants = [r.strip() for r in row[1:] if r.strip()]
-            keywords[channel] = variants
-    return keywords
+# Timeout et passes
+TIMEOUT_FIRST_PASS = 10
+TIMEOUT_SECOND_PASS = 20
+MAX_WORKERS = 25
+MIN_CHANNELS_REQUIRED = 25
 
-KEYWORDS = load_keywords(KEYWORDS_CSV)
+# Mots-clés principaux et variantes (5 max par chaîne)
+KEYWORDS = {
+    "TF1": ["TF1", "T F1", "TF-1", "TF_1", "La Une"],
+    "France 2": ["France 2", "FR2", "France2", "F2", "Deux"],
+    "France 3": ["France 3", "FR3", "France3", "F3", "Trois"],
+    "France 4": ["France 4", "FR4", "France4", "F4", "Quatre"],
+    "France 5": ["France 5", "FR5", "France5", "F5", "Cinq"],
+    "M6": ["M6", "M 6", "M-6", "M_6", "Métropole 6"],
+    "Arte": ["Arte", "ARTE", "AR-TE", "A R T E", "Arte TV"],
+    "6TER": ["6TER", "6 Ter", "6-Ter", "6_Ter", "Sixter"],
+    "W9": ["W9", "W 9", "W-9", "W_9", "W9 TV"],
+    "TMC": ["TMC", "T M C", "T-M-C", "TMC TV", "Télé Monte Carlo"],
+    "TFX": ["TFX", "T F X", "TF-X", "TFX TV", "TFX Channel"],
+    "Chérie 25": ["Chérie 25", "Cherie25", "Cherie 25", "Ch25", "Chérie TV"],
+    "RMC Story": ["RMC Story", "RMCStory", "RMC-S", "RMC Story TV", "RMC Story Channel"],
+    "RMC Découverte": ["RMC Découverte", "RMC Decouverte", "RMC-D", "RMC Découv", "RMC Decouv"],
+    "LCI": ["LCI", "La Chaîne Info", "LCI TV", "LC Info", "LCI News"],
+    "BFM TV": ["BFM TV", "BFM", "BFM-TV", "BFM Info", "BFM News"],
+    "CNews": ["CNews", "C News", "C-News", "iTélé", "Canal News"],
+    "Franceinfo": ["Franceinfo", "France Info", "FInfo", "FranceInfo TV", "France-Info"],
+    "LCP": ["LCP", "La Chaîne Parlementaire", "LCP TV", "LCP Info", "LCP-Info"],
+    "Public Sénat": ["Public Sénat", "PubSenat", "PublicSenat", "PS TV", "Senat TV"],
+    "CANAL+": ["CANAL+", "Canal Plus", "Canal+", "Canal+", "Canal+"],
+    "Paris Première": ["Paris Première", "Paris Premiere", "Paris 1", "Paris1", "PP TV"],
+    "Téva": ["Téva", "Teva", "Téva TV", "T Eva", "TV Téva"],
+    "TV Breizh": ["TV Breizh", "TVBreizh", "TV-Breizh", "TV_Breizh", "Breizh TV"],
+    "Gulli": ["Gulli", "Gulli TV", "GulliTV", "Gulli-France", "Gulli Channel"],
+    "Canal J": ["Canal J", "CanalJ", "Canal-J", "CanalJ TV", "Canal Junior"],
+    "CStar": ["CStar", "C Star", "C-Star", "CStar TV", "CStar Channel"],
+    "TV5 Monde": ["TV5 Monde", "TV5Monde", "TV5", "TV5-Monde", "TV5-TV"],
+    "France 24": ["France 24", "FR24", "France24", "F24", "France Twenty4"],
+    "TVA": ["TVA", "TVA Québec", "TVA Québec", "TVA-TV", "TVA Canada"],
+    "LCN": ["LCN", "LCN TV", "LCN-Info", "LCN News", "LCN Channel"],
+    "Noovo": ["Noovo", "Noovo TV", "Noovo-Québec", "Noovo Channel", "Noovo Canada"],
+    # 👉 tu peux ajouter d'autres chaînes ici
+}
 
-# --- Sources ---
-def load_sources_online():
+# --- FONCTIONS ---
+def log(message):
+    print(message)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(message + "\n")
+
+def find_m3u_files(folder):
+    return sorted(glob.glob(os.path.join(folder, "**", "*.m3u"), recursive=True))
+
+def parse_m3u(file_path):
     urls = []
-    if os.path.exists(INPUT_CSV):
-        with open(INPUT_CSV, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("http"):
-                    urls.append(line)
-    return urls
-
-def load_sources_local(limit=25):
-    m3u_files = list(Path(LOCAL_DIR).rglob("*.m3u"))
-    m3u_files = m3u_files[:limit]
-    urls = []
-    for file in m3u_files:
-        with open(file, "r", encoding="utf-8", errors="ignore") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("http"):
-                    urls.append(line)
-    return urls
-
-# --- Téléchargement et validation ---
-def fetch_playlist(url, timeout):
     try:
-        resp = requests.get(url, timeout=timeout)
-        resp.raise_for_status()
-        return resp.text.splitlines()
+        playlist = m3u8.load(file_path)
+        for seg in playlist.segments:
+            urls.append(str(seg.uri))
     except Exception:
-        return []
+        # Si le fichier est un M3U simple (texte)
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                if line.startswith("http"):
+                    urls.append(line.strip())
+    return urls
 
-def validate_stream(url, timeout):
-    for t in TIMEOUTS:
-        try:
-            resp = requests.get(url, stream=True, timeout=t)
-            if resp.status_code == 200:
+def matches_keywords(name):
+    name_lower = name.lower()
+    for kw_list in KEYWORDS.values():
+        for kw in kw_list:
+            if kw.lower() in name_lower:
                 return True
-        except Exception:
-            continue
     return False
 
-# --- Filtrage par mots-clés ---
-def filter_by_keywords(lines):
-    results = []
-    for i, line in enumerate(lines):
-        if line.startswith("#EXTINF"):
-            for channel, variants in KEYWORDS.items():
-                if any(v.lower() in line.lower() for v in variants):
-                    if i + 1 < len(lines):
-                        url = lines[i + 1].strip()
-                        results.append((channel, line, url))
-    return results
+def validate_url(url, timeout):
+    try:
+        r = requests.head(url, timeout=timeout)
+        if r.status_code == 200:
+            return True
+        return False
+    except Exception:
+        return False
 
-# --- MAIN ---
-def main():
-    all_results = []
-    found_channels = set()
+def process_urls(urls, timeout):
+    valid = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_url = {executor.submit(validate_url, u, timeout): u for u in urls}
+        for i, fut in enumerate(concurrent.futures.as_completed(future_to_url), 1):
+            url = future_to_url[fut]
+            try:
+                if fut.result():
+                    log(f"VALID: {url}")
+                    valid.append(url)
+                else:
+                    log(f"INVALID: {url}")
+            except Exception as e:
+                log(f"ERROR: {url} -> {e}")
+            if i % 10 == 0:
+                log(f"Progress: {i}/{len(urls)} URLs processed")
+    return valid
 
-    for attempt in range(MAX_ATTEMPTS):
-        print(f"\n--- Tentative {attempt+1} ---")
-        urls = load_sources_online() if attempt == 0 else load_sources_local()
-        if not urls:
-            print("⚠️ Aucune source trouvée.")
-            continue
+def run_validation():
+    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+    all_files = find_m3u_files(LOCAL_M3U_DIR)
+    log(f"Found {len(all_files)} M3U files locally.")
 
-        temp_results = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            futures = {executor.submit(fetch_playlist, u, TIMEOUTS[0]): u for u in urls}
-            for future in concurrent.futures.as_completed(futures):
-                lines = future.result()
-                if lines:
-                    temp_results.extend(filter_by_keywords(lines))
+    all_urls = []
+    for f in all_files[:25]:  # 1ère passe, max 25 fichiers
+        all_urls.extend(parse_m3u(f))
 
-        valid_results = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            futures = {executor.submit(validate_stream, url, TIMEOUTS[0]): (ch, info, url) for ch, info, url in temp_results}
-            for future in concurrent.futures.as_completed(futures):
-                if future.result():
-                    ch, info, url = futures[future]
-                    if ch not in found_channels:
-                        valid_results.append((ch, info, url))
-                        found_channels.add(ch)
+    # Filtrage par mots-clés uniquement
+    filtered_urls = [u for u in all_urls if matches_keywords(u)]
+    log(f"URLs after keyword filtering: {len(filtered_urls)}")
 
-        all_results.extend(valid_results)
-        print(f"Chaînes valides cumulées : {len(all_results)}")
-        if len(all_results) >= MIN_REQUIRED:
-            break
+    # Validation
+    valid_urls = process_urls(filtered_urls, TIMEOUT_FIRST_PASS)
 
-    # Écriture du fichier final
-    with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
-        f.write("#EXTM3U\n")
-        for ch, info, url in all_results:
-            f.write(f"{info}\n{url}\n")
+    # Si moins de MIN_CHANNELS_REQUIRED, deuxième passe
+    if len(valid_urls) < MIN_CHANNELS_REQUIRED and len(all_files) > 25:
+        remaining_files = all_files[25:25+25]
+        second_pass_urls = []
+        for f in remaining_files:
+            second_pass_urls.extend(parse_m3u(f))
+        second_pass_filtered = [u for u in second_pass_urls if matches_keywords(u)]
+        log(f"Second pass URLs after keyword filtering: {len(second_pass_filtered)}")
+        second_pass_valid = process_urls(second_pass_filtered, TIMEOUT_SECOND_PASS)
+        valid_urls.extend(second_pass_valid)
 
-    print(f"\n✅ Résultat final : {len(all_results)} chaînes valides trouvées.")
-    print("📌 Liste des chaînes trouvées :")
-    for ch, _, _ in all_results:
-        print(f"- {ch}")
+    # Écriture playlist finale
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        for url in valid_urls:
+            f.write(url + "\n")
+    log(f"Total valid URLs: {len(valid_urls)}")
+    log("Validation finished.")
 
 if __name__ == "__main__":
-    main()
+    run_validation()
