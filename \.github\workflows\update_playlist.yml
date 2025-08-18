@@ -1,0 +1,47 @@
+name: Update M3U playlist (daily)
+
+on:
+  schedule:
+    - cron: "17 4 * * *"  # every day at 04:17 UTC
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Configure git author (optional)
+        if: ${{ secrets.GIT_USER_NAME != '' && secrets.GIT_USER_EMAIL != '' }}
+        run: |
+          git config user.name "${{ secrets.GIT_USER_NAME }}"
+          git config user.email "${{ secrets.GIT_USER_EMAIL }}"
+
+      - name: Provide sources to script via env
+        run: echo "M3U_SOURCES<<EOF" >> $GITHUB_ENV && echo "${{ secrets.M3U_SOURCES }}" >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+
+      - name: Run pipeline
+        env:
+          GITHUB_ACTIONS: "true"
+          M3U_SOURCES: ${{ env.M3U_SOURCES }}
+        run: |
+          python parse_filter_validate_m3u.py --lang fr en --country CA FR --category News Sport || true
+
+      - name: Commit and push (in case --no-git was used)
+        run: |
+          git add filtered_valid_m3u.csv filtered_out.csv final_playlist.m3u log_parse_filter_validate_m3u.txt || true
+          git commit -m "ci: daily playlist refresh" || true
+          git push || true
